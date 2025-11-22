@@ -17,10 +17,10 @@ Aplikacja stylizowana jest na klasyczną telegazetę z lat 80/90:
 
 ## 🛠️ Technologie
 
-- **React** 18
+- **React** 19
 - **Vite** - szybki bundler
 - **React Router** - routing między stronami
-- **Axios** - komunikacja z API (będzie dodany)
+- **Axios** - komunikacja z API
 - **CSS** - vanilla CSS (bez frameworków)
 
 ---
@@ -70,39 +70,76 @@ http://localhost:5173
 ## 📁 Struktura projektu
 ```
 frontend/
-├── public/              # Pliki statyczne
+├── public/              
 ├── src/
-│   ├── components/      # Komponenty wielokrotnego użytku
-│   │   └── layout/      # Header, Footer, Scanlines
-│   ├── pages/           # Główne widoki/strony
+│   ├── components/      
+│   │   ├── layout/      
+│   │   │   ├── AdminLayout.jsx
+│   │   │   ├── AdminNavbar.jsx
+│   │   │   ├── AdminSidebar.jsx
+│   │   │   ├── Header.jsx
+│   │   │   ├── Footer.jsx
+│   │   │   └── Scanlines.jsx
+│   │   └── ProtectedRoute.jsx
+│   ├── pages/           
 │   │   ├── HomePage.jsx
-│   │   └── PageListPage.jsx
-│   ├── services/        # API communication (TODO)
-│   ├── styles/          # Style globalne
+│   │   ├── PageListPage.jsx
+│   │   ├── AdminLogin.jsx
+│   │   ├── AdminDashboard.jsx
+│   │   ├── AdminPages.jsx
+│   │   ├── AdminPageNew.jsx
+│   │   ├── AdminIntegrations.jsx
+│   │   └── AdminStats.jsx
+│   ├── services/        
+│   │   └── api.jsx
+│   ├── styles/          
 │   │   └── teletext.css
-│   ├── utils/           # Helpery, stałe (TODO)
-│   ├── App.jsx          # Główny komponent z routingiem
-│   └── main.jsx         # Entry point
-├── index.html           # HTML template
-├── package.json         # Zależności npm
-└── vite.config.js       # Konfiguracja Vite
+│   ├── App.jsx          
+│   └── main.jsx         
+├── index.html           
+├── package.json         
+└── vite.config.js       
 ```
 
 ---
 
 ## 🌐 Routing
 
-Aktualnie dostępne strony:
+### Strony publiczne:
 
 | URL | Komponent | Opis |
 |-----|-----------|------|
-| `/` | `HomePage` | Strona główna (landing page) |
-| `/pages` | `PageListPage` | Lista stron telegazety (TODO: połączenie z API) |
+| `/` | `HomePage` | Strona główna |
+| `/pages` | `PageListPage` | Lista stron telegazety |
 
-**Planowane:**
-- `/pages/:pageNumber` - Widok pojedynczej strony (np. `/pages/100`)
-- `/admin/login` - Logowanie administratora
-- `/admin/dashboard` - Panel admina
+### Panel administratora (chronione):
+
+| URL | Komponent | Opis |
+|-----|-----------|------|
+| `/admin/login` | `AdminLogin` | Logowanie administratora |
+| `/admin/dashboard` | `AdminDashboard` | Panel główny admina |
+| `/admin/pages` | `AdminPages` | Zarządzanie stronami |
+| `/admin/pages/new` | `AdminPageNew` | Dodawanie nowej strony |
+| `/admin/integrations` | `AdminIntegrations` | Konfiguracja integracji |
+| `/admin/stats` | `AdminStats` | Statystyki odwiedzin |
+
+**Uwaga:** Wszystkie trasy `/admin/*` (oprócz `/admin/login`) wymagają zalogowania. Brak tokenu JWT przekierowuje do strony logowania.
+
+---
+
+## 🔐 Autoryzacja
+
+Panel administratora wykorzystuje JWT (JSON Web Token) do autoryzacji:
+
+- Token przechowywany w `localStorage`
+- Automatyczne przekierowanie przy braku tokenu
+- Przycisk wylogowania w menu bocznym
+
+**Dane testowe (mock):**
+```
+Email: admin@test.pl
+Hasło: admin123
+```
 
 ---
 
@@ -117,6 +154,9 @@ Backend aplikacji znajduje się w osobnym repozytorium:
 1. Uruchom backend (patrz: backend README)
 2. Backend musi być dostępny na `http://localhost:8080`
 3. Frontend automatycznie połączy się z API
+
+**Aktualne API endpoints:**
+- `POST /api/auth/login` - Logowanie administratora
 
 ---
 
@@ -135,10 +175,15 @@ Projekt wykonywany w ramach kursu *Projektowanie i programowanie systemów inter
 
 ---
 
-## 🐛 Znane problemy / TODO
+## ✅ Zrealizowane funkcjonalności
 
+- [x] Logowanie administratora (JWT)
+- [x] Panel administratora z layoutem
+- [x] Top navbar (data, czas, temperatura, święto)
+- [x] Sidebar z menu nawigacyjnym
+- [x] Protected routes
+- [x] Wylogowanie
 - [ ] Połączenie z API backendu
-- [ ] Wyświetlanie listy stron z API
-- [ ] Widok pojedynczej strony telegazety
-- [ ] Panel administratora
-- [ ] Autoryzacja JWT
+- [ ] CRUD dla stron telegazety
+- [ ] Integracje zewnętrzne (pogoda, lotto, kursy walut, etc.)
+- [ ] Statystyki odwiedzin

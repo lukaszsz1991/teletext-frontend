@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AdminLayout from '../components/layout/AdminLayout.jsx';
 import '../styles/teletext.css';
 
 function AdminDashboard() {
@@ -19,43 +20,12 @@ function AdminDashboard() {
         }
     }, [navigate]);
 
-    const handleLogout = () => {
-        // Usuń dane z localStorage
-        localStorage.removeItem('jwt_token');
-        localStorage.removeItem('user_email');
-
-        // Przekieruj do strony logowania
-        navigate('/admin/login');
-    };
-
     return (
-        <div className="container">
-            {/* Efekt scanlines */}
-            <div className="scanlines"></div>
-
+        <AdminLayout>
             {/* Header */}
             <div className="header">
-                <h1>TELEGAZETA</h1>
-                <p>PANEL ADMINISTRACYJNY</p>
-            </div>
-
-            {/* Informacja o zalogowaniu */}
-            <div className="info-section">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                        <h3>Witaj, {userEmail}!</h3>
-                        <p style={{ marginTop: '10px', fontSize: '12px' }}>
-                            Jesteś zalogowany jako administrator
-                        </p>
-                    </div>
-                    <button
-                        onClick={handleLogout}
-                        className="btn"
-                        style={{ minWidth: '150px' }}
-                    >
-                        ⏻ WYLOGUJ
-                    </button>
-                </div>
+                <h1>DASHBOARD</h1>
+                <p>Panel główny administratora</p>
             </div>
 
             {/* ASCII Art */}
@@ -119,10 +89,10 @@ function AdminDashboard() {
 
             {/* Footer */}
             <div className="footer">
-                <p>TELEGAZETA © 2024 | SYSTEM ZARZĄDZANIA</p>
+                <p>TELEGAZETA © 2025 | SYSTEM ZARZĄDZANIA</p>
                 <p>SESJA ADMINA: AKTYWNA</p>
             </div>
-        </div>
+        </AdminLayout>
     );
 }
 

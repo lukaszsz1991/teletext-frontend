@@ -3,20 +3,61 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import PageListPage from "./pages/PageListPage.jsx";
 import AdminLogin from "./pages/AdminLogin.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
+import AdminPages from "./pages/AdminPages.jsx";
+import AdminPageNew from "./pages/AdminPageNew.jsx";
+import AdminIntegrations from "./pages/AdminIntegrations.jsx";
+import AdminStats from "./pages/AdminStats.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
     return (
         <Router>
             <Routes>
+                {/* Public routes */}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/pages" element={<PageListPage />} />
+
+                {/* Admin login (public) */}
                 <Route path="/admin/login" element={<AdminLogin />} />
+
+                {/* Protected admin routes */}
                 <Route
                     path="/admin/dashboard"
                     element={
                         <ProtectedRoute>
                             <AdminDashboard />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/pages"
+                    element={
+                        <ProtectedRoute>
+                            <AdminPages />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/pages/new"
+                    element={
+                        <ProtectedRoute>
+                            <AdminPageNew />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/integrations"
+                    element={
+                        <ProtectedRoute>
+                            <AdminIntegrations />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/stats"
+                    element={
+                        <ProtectedRoute>
+                            <AdminStats />
                         </ProtectedRoute>
                     }
                 />
