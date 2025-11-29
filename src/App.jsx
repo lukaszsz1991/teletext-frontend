@@ -46,6 +46,14 @@ function App() {
                     }
                 />
                 <Route
+                    path="/admin/pages/edit/:id"
+                    element={
+                        <ProtectedRoute>
+                            <AdminPageNew />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
                     path="/admin/integrations"
                     element={
                         <ProtectedRoute>

@@ -1,7 +1,11 @@
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/layout/AdminLayout';
+import PagesList from '../components/PagesList';
 import '../styles/teletext.css';
 
 function AdminPages() {
+    const navigate = useNavigate();
+
     return (
         <AdminLayout>
             <div className="header">
@@ -9,18 +13,22 @@ function AdminPages() {
                 <p>Zarządzanie stronami</p>
             </div>
 
-            <div className="info-section">
-                <h3>Lista Stron</h3>
-                <p>Tutaj będzie lista wszystkich stron telegazety z opcjami edycji i usuwania.</p>
+            <div className="button-group" style={{ marginBottom: '30px' }}>
+                <button
+                    className="btn"
+                    onClick={() => navigate('/admin/pages/new')}
+                >
+                    ➕ Dodaj nową stronę
+                </button>
+                <button
+                    className="btn"
+                    onClick={() => window.location.reload()}
+                >
+                    🔄 Odśwież listę
+                </button>
             </div>
 
-            <div className="ascii-art" style={{ textAlign: 'center', margin: '30px 0' }}>
-                {`┌────────────────────────────┐
-│   W BUDOWIE...             │
-│   Funkcjonalność CRUD      │
-│   dla stron telegazety     │
-└────────────────────────────┘`}
-            </div>
+            <PagesList />
         </AdminLayout>
     );
 }
