@@ -97,10 +97,79 @@ export const clearSession = () => {
     localStorage.removeItem('user_email');
 };
 
+const PAGES_STORAGE_KEY = 'teletext_mock_pages';
+
+const getStoredPages = () => {
+    const stored = localStorage.getItem(PAGES_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+};
+
+const saveStoredPages = (pages) => {
+    localStorage.setItem(PAGES_STORAGE_KEY, JSON.stringify(pages));
+};
+
+const getDefaultMockPages = () => {
+    return [
+        {
+            id: 1,
+            pageNumber: 100,
+            title: 'Strona główna wiadomości',
+            category: { originalName: 'NEWS', category: 'Wiadomości' },
+            createdAt: '2025-12-10T10:00:00',
+            updatedAt: '2025-12-13T15:30:00'
+        },
+        {
+            id: 2,
+            pageNumber: 101,
+            title: 'Najnowsze wydarzenia',
+            category: { originalName: 'NEWS', category: 'Wiadomości' },
+            createdAt: '2025-12-11T12:00:00',
+            updatedAt: '2025-12-13T16:00:00'
+        },
+        {
+            id: 3,
+            pageNumber: 200,
+            title: 'Sport - wyniki meczów',
+            category: { originalName: 'SPORTS', category: 'Sport' },
+            createdAt: '2025-12-12T09:00:00',
+            updatedAt: '2025-12-13T18:00:00'
+        },
+        {
+            id: 4,
+            pageNumber: 201,
+            title: 'Ekstraklasa - tabela',
+            category: { originalName: 'SPORTS', category: 'Sport' },
+            createdAt: '2025-12-12T14:00:00',
+            updatedAt: '2025-12-13T19:00:00'
+        },
+        {
+            id: 5,
+            pageNumber: 500,
+            title: 'Prognoza pogody',
+            category: { originalName: 'WEATHER', category: 'Pogoda' },
+            createdAt: '2025-12-13T08:00:00',
+            updatedAt: '2025-12-13T20:00:00'
+        }
+    ];
+};
+
 export const getNextAvailablePageNumber = async () => {
     return new Promise((resolve) => {
         setTimeout(() => {
-            resolve({ nextNumber: 102 });
+            const storedPages = getStoredPages();
+            const defaultPages = getDefaultMockPages();
+            const allPages = [...defaultPages, ...storedPages];
+
+            const usedNumbers = allPages.map(p => p.pageNumber);
+
+            for (let num = 100; num <= 999; num++) {
+                if (!usedNumbers.includes(num)) {
+                    resolve({ nextNumber: num });
+                    return;
+                }
+            }
+
+            resolve({ nextNumber: 999 });
         }, 500);
     });
 };
@@ -118,18 +187,35 @@ export const createPage = async (pageData) => {
                 return;
             }
 
-            resolve({
+            const storedPages = getStoredPages();
+            const categories = [
+                { originalName: 'NEWS', category: 'Wiadomości' },
+                { originalName: 'SPORTS', category: 'Sport' },
+                { originalName: 'LOTTERY', category: 'Gry losowe' },
+                { originalName: 'TV', category: 'Program TV' },
+                { originalName: 'WEATHER', category: 'Pogoda' },
+                { originalName: 'JOBS', category: 'Oferty pracy' },
+                { originalName: 'HOROSCOPE', category: 'Horoskop' },
+                { originalName: 'FINANCE', category: 'Finanse' },
+                { originalName: 'MISC', category: 'Różne' }
+            ];
+
+            const categoryData = categories.find(c => c.originalName === pageData.category);
+
+            const newPage = {
                 id: Date.now(),
                 pageNumber: pageData.pageNumber,
                 title: pageData.title,
-                category: {
-                    category: pageData.category,
-                    originalName: pageData.category
-                },
+                category: categoryData || { originalName: pageData.category, category: pageData.category },
                 content: pageData.content,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
-            });
+            };
+
+            storedPages.push(newPage);
+            saveStoredPages(storedPages);
+
+            resolve(newPage);
         }, 1000);
     });
 };
@@ -155,48 +241,34 @@ export const getCategories = async () => {
 export const getAllPages = async () => {
     return new Promise((resolve) => {
         setTimeout(() => {
-            resolve([
-                {
-                    id: 1,
-                    pageNumber: 100,
-                    title: 'Strona główna wiadomości',
-                    category: { originalName: 'NEWS', category: 'Wiadomości' },
-                    createdAt: '2025-12-10T10:00:00',
-                    updatedAt: '2025-12-13T15:30:00'
-                },
-                {
-                    id: 2,
-                    pageNumber: 101,
-                    title: 'Najnowsze wydarzenia',
-                    category: { originalName: 'NEWS', category: 'Wiadomości' },
-                    createdAt: '2025-12-11T12:00:00',
-                    updatedAt: '2025-12-13T16:00:00'
-                },
-                {
-                    id: 3,
-                    pageNumber: 200,
-                    title: 'Sport - wyniki meczów',
-                    category: { originalName: 'SPORTS', category: 'Sport' },
-                    createdAt: '2025-12-12T09:00:00',
-                    updatedAt: '2025-12-13T18:00:00'
-                },
-                {
-                    id: 4,
-                    pageNumber: 201,
-                    title: 'Ekstraklasa - tabela',
-                    category: { originalName: 'SPORTS', category: 'Sport' },
-                    createdAt: '2025-12-12T14:00:00',
-                    updatedAt: '2025-12-13T19:00:00'
-                },
-                {
-                    id: 5,
-                    pageNumber: 500,
-                    title: 'Prognoza pogody',
-                    category: { originalName: 'WEATHER', category: 'Pogoda' },
-                    createdAt: '2025-12-13T08:00:00',
-                    updatedAt: '2025-12-13T20:00:00'
-                }
-            ]);
+            const storedPages = getStoredPages();
+            const defaultPages = getDefaultMockPages();
+            const allPages = [...defaultPages, ...storedPages];
+            resolve(allPages);
+        }, 500);
+    });
+};
+
+export const deletePage = async (pageId) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            const storedPages = getStoredPages();
+            const defaultPages = getDefaultMockPages();
+
+            const isDefaultPage = defaultPages.some(p => p.id === pageId);
+            if (isDefaultPage) {
+                reject({
+                    response: {
+                        status: 403,
+                        data: { message: 'Nie można usunąć domyślnej strony demo' }
+                    }
+                });
+                return;
+            }
+
+            const filteredPages = storedPages.filter(p => p.id !== pageId);
+            saveStoredPages(filteredPages);
+            resolve({ success: true });
         }, 500);
     });
 };

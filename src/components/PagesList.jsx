@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllPages } from '../services/api';
+import { getAllPages, deletePage } from '../services/api';
 import '../styles/teletext.css';
 
 function PagesList() {
@@ -43,19 +43,20 @@ function PagesList() {
         setDeleteConfirm(page);
     };
 
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = async () => {
         if (deleteConfirm) {
-            // Mock usuwania - backend nie ma jeszcze DELETE endpoint
-            alert(`Funkcjonalność usuwania jest w budowie.\n\nStrona "${deleteConfirm.title}" (${deleteConfirm.pageNumber}) zostanie usunięta po implementacji backendu.`);
-            setDeleteConfirm(null);
-
-            // TODO: Gdy backend będzie gotowy, odkomentować:
-            // try {
-            //     await apiClient.delete(`/admin/pages/${deleteConfirm.id}`);
-            //     fetchPages(); // Odśwież listę
-            // } catch (err) {
-            //     alert('Błąd podczas usuwania strony');
-            // }
+            try {
+                await deletePage(deleteConfirm.id);
+                setDeleteConfirm(null);
+                fetchPages();
+            } catch (err) {
+                if (err.response?.status === 403) {
+                    alert(err.response.data.message);
+                } else {
+                    alert('Błąd podczas usuwania strony');
+                }
+                setDeleteConfirm(null);
+            }
         }
     };
 
