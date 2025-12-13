@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import apiClient from '../services/api';
+import { getAllPages } from '../services/api';
 import '../styles/teletext.css';
 
 function PagesList() {
@@ -19,27 +19,10 @@ function PagesList() {
         setError(null);
 
         try {
-            // Pobierz wszystkie kategorie
-            const categoriesResponse = await apiClient.get('/public/categories');
-            const categories = categoriesResponse.data;
-
-            // Dla każdej kategorii pobierz strony
-            const allPages = [];
-            for (const category of categories) {
-                try {
-                    const pagesResponse = await apiClient.get(`/public/pages?category=${category.originalName}`);
-                    allPages.push(...pagesResponse.data);
-                } catch (err) {
-                    console.warn(`Nie udało się pobrać stron dla kategorii ${category.originalName}:`, err);
-                }
-            }
-
-            // Sortowanie po numerze strony (rosnąco)
+            const allPages = await getAllPages();
             const sortedPages = allPages.sort((a, b) => a.pageNumber - b.pageNumber);
             setPages(sortedPages);
-
         } catch (err) {
-            console.error('Błąd podczas pobierania stron:', err);
             setError('Nie udało się pobrać listy stron. Sprawdź połączenie z serwerem.');
         } finally {
             setLoading(false);
