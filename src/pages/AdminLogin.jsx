@@ -6,33 +6,25 @@ import '../styles/teletext.css';
 function AdminLogin() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        email: '',
+        username: '',  // ZMIENIONE: email → username
         password: ''
     });
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [apiError, setApiError] = useState('');
 
-    // Walidacja email
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
     // Walidacja formularza
     const validateForm = () => {
         const newErrors = {};
 
-        if (!formData.email.trim()) {
-            newErrors.email = 'Email jest wymagany';
-        } else if (!validateEmail(formData.email)) {
-            newErrors.email = 'Nieprawidłowy format email';
+        if (!formData.username.trim()) {  // ZMIENIONE: email → username
+            newErrors.username = 'Login jest wymagany';
         }
 
         if (!formData.password.trim()) {
             newErrors.password = 'Hasło jest wymagane';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'Hasło musi mieć minimum 6 znaków';
+        } else if (formData.password.length < 5) {  // ZMIENIONE: 6 → 5
+            newErrors.password = 'Hasło musi mieć minimum 5 znaków';
         }
 
         setErrors(newErrors);
@@ -71,13 +63,13 @@ function AdminLogin() {
         setApiError('');
 
         try {
-            // Wywołanie API logowania przez serwis
-            const response = await login(formData.email, formData.password);
+            // Wywołanie API logowania przez serwis - ZMIENIONE: username zamiast email
+            const response = await login(formData.username, formData.password);
 
             // Zapisz token w localStorage
             if (response.token) {
                 localStorage.setItem('jwt_token', response.token);
-                localStorage.setItem('user_email', formData.email);
+                localStorage.setItem('user_email', formData.username);  // ZMIENIONE
 
                 // Przekierowanie do panelu admina
                 navigate('/admin/dashboard');
@@ -88,7 +80,7 @@ function AdminLogin() {
             if (error.response) {
                 // Błąd zwrócony przez serwer
                 if (error.response.status === 401) {
-                    setApiError('Nieprawidłowy email lub hasło');
+                    setApiError('Nieprawidłowy login lub hasło');
                 } else if (error.response.status === 403) {
                     setApiError('Brak uprawnień administratora');
                 } else {
@@ -129,10 +121,10 @@ function AdminLogin() {
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                    {/* Pole Email */}
+                    {/* Pole Username - ZMIENIONE */}
                     <div style={{ marginBottom: '20px' }}>
                         <label
-                            htmlFor="email"
+                            htmlFor="username"
                             style={{
                                 display: 'block',
                                 marginBottom: '8px',
@@ -141,28 +133,28 @@ function AdminLogin() {
                                 letterSpacing: '1px'
                             }}
                         >
-                            ► Email:
+                            ► Login:
                         </label>
                         <input
                             type="text"
-                            id="email"
-                            name="email"
-                            value={formData.email}
+                            id="username"
+                            name="username"
+                            value={formData.username}
                             onChange={handleChange}
                             disabled={isLoading}
                             style={{
                                 width: '100%',
                                 padding: '12px',
                                 backgroundColor: '#0a0a0a',
-                                border: errors.email ? '2px solid #ff0000' : '2px solid #00ff00',
+                                border: errors.username ? '2px solid #ff0000' : '2px solid #00ff00',
                                 color: '#00ff00',
                                 fontFamily: 'Courier New, monospace',
                                 fontSize: '14px',
                                 outline: 'none'
                             }}
-                            placeholder="admin@telegazeta.pl"
+                            placeholder="admin"
                         />
-                        {errors.email && (
+                        {errors.username && (
                             <div style={{
                                 color: '#ff0000',
                                 fontSize: '12px',
@@ -171,7 +163,7 @@ function AdminLogin() {
                                 border: '1px solid #ff0000',
                                 backgroundColor: '#1a0000'
                             }}>
-                                ✗ {errors.email}
+                                ✗ {errors.username}
                             </div>
                         )}
                     </div>
@@ -247,7 +239,7 @@ function AdminLogin() {
                     </button>
                 </form>
 
-                {/* Testowa usunąć w produkcji) */}
+                {/* Informacja testowa (usunąć w produkcji) */}
                 <div style={{
                     marginTop: '30px',
                     padding: '15px',
@@ -257,7 +249,7 @@ function AdminLogin() {
                     color: '#00aa00'
                 }}>
                     <strong>ℹ INFORMACJA DEWELOPERSKA:</strong><br />
-                    Endpoint: POST /api/auth/login<br />
+                    Endpoint: POST /api/admin/auth/login<br />
                     Oczekiwany format odpowiedzi: {`{ "token": "jwt_token_here" }`}
                 </div>
             </div>
