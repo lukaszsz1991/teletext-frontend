@@ -6,7 +6,7 @@ import '../styles/teletext.css';
 function AdminLogin() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        username: '',  // ZMIENIONE: email → username
+        username: '',
         password: ''
     });
     const [errors, setErrors] = useState({});
@@ -17,13 +17,13 @@ function AdminLogin() {
     const validateForm = () => {
         const newErrors = {};
 
-        if (!formData.username.trim()) {  // ZMIENIONE: email → username
+        if (!formData.username.trim()) {
             newErrors.username = 'Login jest wymagany';
         }
 
         if (!formData.password.trim()) {
             newErrors.password = 'Hasło jest wymagane';
-        } else if (formData.password.length < 5) {  // ZMIENIONE: 6 → 5
+        } else if (formData.password.length < 5) {
             newErrors.password = 'Hasło musi mieć minimum 5 znaków';
         }
 
@@ -238,6 +238,23 @@ function AdminLogin() {
                         {isLoading ? '⟳ LOGOWANIE...' : '▶ ZALOGUJ SIĘ'}
                     </button>
                 </form>
+
+                {/* Przycisk powrotu do strony głównej */}
+                <div style={{ marginTop: '30px', textAlign: 'center' }}>
+                    <button
+                        type="button"
+                        className="btn"
+                        onClick={() => window.location.href = '/'}
+                        style={{
+                            width: '100%',
+                            padding: '12px',
+                            backgroundColor: '#0a0a0a',
+                            borderColor: '#00aa00'
+                        }}
+                    >
+                        ← POWRÓT DO STRONY GŁÓWNEJ
+                    </button>
+                </div>
 
                 {/* Informacja testowa (usunąć w produkcji) */}
                 <div style={{
