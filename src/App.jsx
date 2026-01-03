@@ -8,6 +8,7 @@ import AdminPageNew from "./pages/AdminPageNew.jsx";
 import AdminIntegrations from "./pages/AdminIntegrations.jsx";
 import AdminStats from "./pages/AdminStats.jsx";
 import PageViewPage from "./pages/PageViewPage.jsx";
+import WeatherPage from "./pages/integrations/WeatherPage.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/pages" element={<PageListPage />} />
                 <Route path="/pages/:pageNumber" element={<PageViewPage />} />
+                <Route path="/pages/300" element={<WeatherPage />} />
 
                 {/* Admin login (public) */}
                 <Route path="/admin/login" element={<AdminLogin />} />

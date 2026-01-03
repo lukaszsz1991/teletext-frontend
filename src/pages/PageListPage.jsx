@@ -22,7 +22,14 @@ function PageListPage() {
 
         try {
             const allPages = await getAllPages();
-            const sortedPages = allPages.sort((a, b) => a.pageNumber - b.pageNumber);
+
+            // Strony integracji (nie są w bazie)
+            const integrationPages = [
+                { id: 'int-300', pageNumber: 300, title: 'Prognoza Pogody (LIVE)', category: 'WEATHER' }
+            ];
+
+            const combinedPages = [...allPages, ...integrationPages];
+            const sortedPages = combinedPages.sort((a, b) => a.pageNumber - b.pageNumber);
             setPages(sortedPages);
         } catch (err) {
             setError('Nie udało się pobrać listy stron.');
@@ -30,7 +37,6 @@ function PageListPage() {
             setLoading(false);
         }
     };
-
     const handlePageClick = (pageNumber) => {
         navigate(`/pages/${pageNumber}`);
     };
@@ -100,6 +106,13 @@ function PageListPage() {
                     <p style={{ fontSize: '12px', textAlign: 'center' }}>
                         Łącznie stron: <strong>{pages.length}</strong>
                     </p>
+                </div>
+
+                {/* Przycisk powrotu do strony głównej */}
+                <div className="button-group" style={{ marginTop: '30px' }}>
+                    <button className="btn" onClick={() => navigate('/')}>
+                        ← Strona główna
+                    </button>
                 </div>
 
                 <Footer />
