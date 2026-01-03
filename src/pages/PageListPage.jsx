@@ -25,7 +25,8 @@ function PageListPage() {
 
             // Strony integracji (nie są w bazie)
             const integrationPages = [
-                { id: 'int-300', pageNumber: 300, title: 'Prognoza Pogody (LIVE)', category: 'WEATHER' }
+                { id: 'int-300', pageNumber: 300, title: 'Prognoza Pogody (LIVE)', category: 'WEATHER' },
+                { id: 'int-400', pageNumber: 400, title: 'Kursy Walut (LIVE)', category: 'FINANCE' },
             ];
 
             const combinedPages = [...allPages, ...integrationPages];

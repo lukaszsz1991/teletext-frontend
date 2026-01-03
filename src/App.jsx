@@ -9,6 +9,7 @@ import AdminIntegrations from "./pages/AdminIntegrations.jsx";
 import AdminStats from "./pages/AdminStats.jsx";
 import PageViewPage from "./pages/PageViewPage.jsx";
 import WeatherPage from "./pages/integrations/WeatherPage.jsx";
+import CurrencyPage from "./pages/integrations/CurrencyPage.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
                 <Route path="/pages" element={<PageListPage />} />
                 <Route path="/pages/:pageNumber" element={<PageViewPage />} />
                 <Route path="/pages/300" element={<WeatherPage />} />
+                <Route path="/pages/400" element={<CurrencyPage />} />
 
                 {/* Admin login (public) */}
                 <Route path="/admin/login" element={<AdminLogin />} />
