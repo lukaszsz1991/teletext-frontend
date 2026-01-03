@@ -7,6 +7,7 @@ import AdminPages from "./pages/AdminPages.jsx";
 import AdminPageNew from "./pages/AdminPageNew.jsx";
 import AdminIntegrations from "./pages/AdminIntegrations.jsx";
 import AdminStats from "./pages/AdminStats.jsx";
+import PageViewPage from "./pages/PageViewPage.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
                 {/* Public routes */}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/pages" element={<PageListPage />} />
+                <Route path="/pages/:pageNumber" element={<PageViewPage />} />
 
                 {/* Admin login (public) */}
                 <Route path="/admin/login" element={<AdminLogin />} />

@@ -143,7 +143,7 @@ function PagesList() {
                         <tr key={page.id}>
                             <td className="page-number">{page.pageNumber}</td>
                             <td className="page-title">{page.title}</td>
-                            <td className="page-category">{page.category.category}</td>
+                            <td className="page-category">{page.category}</td>
                             <td className="page-date">{formatDate(page.updatedAt)}</td>
                             <td className="page-actions">
                                 <button
@@ -197,7 +197,7 @@ function PagesList() {
                         <div className="info-section" style={{ margin: '20px 0' }}>
                             <p><strong>Numer:</strong> {deleteConfirm.pageNumber}</p>
                             <p><strong>Tytuł:</strong> {deleteConfirm.title}</p>
-                            <p><strong>Kategoria:</strong> {deleteConfirm.category.category}</p>
+                            <p><strong>Kategoria:</strong> {deleteConfirm.category}</p>
                         </div>
                         <div className="button-group" style={{ marginTop: '20px' }}>
                             <button className="btn btn-delete" onClick={handleDeleteConfirm}>

@@ -40,9 +40,7 @@ apiClient.interceptors.response.use(
     }
 );
 
-// ============================================
 // AUTHENTICATION
-// ============================================
 
 export const login = async (username, password) => {
     try {
@@ -85,9 +83,7 @@ export const clearSession = () => {
     localStorage.removeItem('user_email');
 };
 
-// ============================================
 // CATEGORIES
-// ============================================
 
 export const getCategories = async () => {
     try {
@@ -98,14 +94,13 @@ export const getCategories = async () => {
     }
 };
 
-// ============================================
 // PAGES
-// ============================================
 
 export const getAllPages = async (category = 'NEWS', includeInactive = false) => {
     try {
-        const response = await apiClient.get('/admin/pages', {
-            params: { category, includeInactive }
+        // Publicznu endpoint
+        const response = await apiClient.get('/public/pages', {
+            params: { category }
         });
         return response.data;
     } catch (error) {
@@ -168,9 +163,7 @@ export const deletePage = async (pageId) => {
     }
 };
 
-// ============================================
 // UTILITY - jeżeli backend wspiera
-// ============================================
 
 export const getNextAvailablePageNumber = async () => {
     try {
