@@ -10,6 +10,7 @@ import AdminStats from "./pages/AdminStats.jsx";
 import PageViewPage from "./pages/PageViewPage.jsx";
 import WeatherPage from "./pages/integrations/WeatherPage.jsx";
 import CurrencyPage from "./pages/integrations/CurrencyPage.jsx";
+import NewsPage from "./pages/integrations/NewsPage.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
                 <Route path="/pages/:pageNumber" element={<PageViewPage />} />
                 <Route path="/pages/300" element={<WeatherPage />} />
                 <Route path="/pages/400" element={<CurrencyPage />} />
+                <Route path="/pages/500" element={<NewsPage />} />
 
                 {/* Admin login (public) */}
                 <Route path="/admin/login" element={<AdminLogin />} />

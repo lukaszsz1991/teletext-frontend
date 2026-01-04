@@ -27,6 +27,7 @@ function PageListPage() {
             const integrationPages = [
                 { id: 'int-300', pageNumber: 300, title: 'Prognoza Pogody (LIVE)', category: 'WEATHER' },
                 { id: 'int-400', pageNumber: 400, title: 'Kursy Walut (LIVE)', category: 'FINANCE' },
+                { id: 'int-500', pageNumber: 500, title: 'Najnowsze Wiadomości (LIVE)', category: 'NEWS' }
             ];
 
             const combinedPages = [...allPages, ...integrationPages];
