@@ -11,6 +11,7 @@ import PageViewPage from "./pages/PageViewPage.jsx";
 import WeatherPage from "./pages/integrations/WeatherPage.jsx";
 import CurrencyPage from "./pages/integrations/CurrencyPage.jsx";
 import NewsPage from "./pages/integrations/NewsPage.jsx";
+import JobsPage from "./pages/integrations/JobsPage.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
                 <Route path="/pages/300" element={<WeatherPage />} />
                 <Route path="/pages/400" element={<CurrencyPage />} />
                 <Route path="/pages/500" element={<NewsPage />} />
+                <Route path="/pages/600" element={<JobsPage />} />
 
                 {/* Admin login (public) */}
                 <Route path="/admin/login" element={<AdminLogin />} />
