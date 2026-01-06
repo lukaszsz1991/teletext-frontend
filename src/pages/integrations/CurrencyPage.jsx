@@ -86,7 +86,6 @@ function CurrencyPage() {
             <div className="container">
                 <Header />
 
-                {/* Nagłówek strony */}
                 <div className="info-section">
                     <h2 style={{ fontSize: '32px', marginBottom: '10px' }}>
                         801 - Kursy Walut
@@ -96,14 +95,12 @@ function CurrencyPage() {
                     </p>
                 </div>
 
-                {/* ASCII Art */}
                 <div className="ascii-art" style={{ textAlign: 'center', margin: '20px 0', fontSize: '14px' }}>
                     {`╔══════════════════════════════════╗
 ║      KURSY WALUT NBP              ║
 ╚══════════════════════════════════╝`}
                 </div>
 
-                {/* Główny kurs */}
                 {currencyData && (
                     <div className="info-section">
                         <div style={{
@@ -132,7 +129,6 @@ function CurrencyPage() {
                             </div>
                         </div>
 
-                        {/* Historia kursów */}
                         <div style={{ marginTop: '30px' }}>
                             <h3 style={{ fontSize: '18px', marginBottom: '15px', color: '#00ff00' }}>
                                 📊 Historia kursów (ostatnie {currencyData.rates.length} dni)
@@ -195,7 +191,6 @@ function CurrencyPage() {
                     </div>
                 )}
 
-                {/* Przyciski nawigacji */}
                 <div className="button-group" style={{ marginTop: '30px' }}>
                     <button className="btn" onClick={() => navigate('/pages')}>
                         ← Powrót do listy

@@ -12,25 +12,24 @@ import WeatherPage from "./pages/integrations/WeatherPage.jsx";
 import CurrencyPage from "./pages/integrations/CurrencyPage.jsx";
 import NewsPage from "./pages/integrations/NewsPage.jsx";
 import JobsPage from "./pages/integrations/JobsPage.jsx";
+import LotteryPage from "./pages/integrations/Lotterypage.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
     return (
         <Router>
             <Routes>
-                {/* Public routes */}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/pages" element={<PageListPage />} />
                 <Route path="/pages/:pageNumber" element={<PageViewPage />} />
-                <Route path="/pages/502" element={<WeatherPage />} />
-                <Route path="/pages/801" element={<CurrencyPage />} />
                 <Route path="/pages/102" element={<NewsPage />} />
+                <Route path="/pages/302" element={<LotteryPage />} />
+                <Route path="/pages/502" element={<WeatherPage />} />
                 <Route path="/pages/600" element={<JobsPage />} />
+                <Route path="/pages/801" element={<CurrencyPage />} />
 
-                {/* Admin login (public) */}
                 <Route path="/admin/login" element={<AdminLogin />} />
 
-                {/* Protected admin routes */}
                 <Route
                     path="/admin/dashboard"
                     element={
