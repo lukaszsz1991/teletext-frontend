@@ -22,9 +22,9 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/pages" element={<PageListPage />} />
                 <Route path="/pages/:pageNumber" element={<PageViewPage />} />
-                <Route path="/pages/300" element={<WeatherPage />} />
-                <Route path="/pages/400" element={<CurrencyPage />} />
-                <Route path="/pages/500" element={<NewsPage />} />
+                <Route path="/pages/502" element={<WeatherPage />} />
+                <Route path="/pages/801" element={<CurrencyPage />} />
+                <Route path="/pages/102" element={<NewsPage />} />
                 <Route path="/pages/600" element={<JobsPage />} />
 
                 {/* Admin login (public) */}

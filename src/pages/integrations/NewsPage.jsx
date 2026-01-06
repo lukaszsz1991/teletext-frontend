@@ -10,33 +10,49 @@ function NewsPage() {
     const [news, setNews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    useEffect(() => {
-        fetchNews();
-    }, []);
+    const [pageTitle, setPageTitle] = useState('');
 
     const fetchNews = async () => {
         setLoading(true);
         setError(null);
 
         try {
-            const apiKey = 'pub_0e755a29d1574e1fae3fbe4439adc43d';
-            const response = await fetch(
-                `https://newsdata.io/api/1/news?apikey=${apiKey}&language=pl&category=top`
-            );
+            // Pobierz dane z backendu zamiast bezpośrednio z NewsData API
+            const response = await fetch('http://localhost:8080/api/public/pages/102');
 
             if (!response.ok) {
-                throw new Error('Nie udało się pobrać wiadomości');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
-            setNews(data.results.slice(0, 10)); // Tylko 10 najnowszych
-        } catch (err) {
-            setError(err.message);
-        } finally {
+
+            // Wyciągnij tytuł strony
+            setPageTitle(data.content.title);
+
+            // Backend zwraca jeden artykuł w content
+            // Przekształć do formatu tablicy dla kompatybilności z istniejącym UI
+            const article = {
+                title: data.content.title,
+                description: data.content.description,
+                link: data.content.additionalData.link,
+                pubDate: data.content.additionalData.publicationDate,
+                source_id: data.content.additionalData.creator?.[0] || data.content.additionalData.sourceName,
+                category: data.content.additionalData.category,
+                keywords: data.content.additionalData.keywords
+            };
+
+            setNews([article]); // Jeden artykuł jako tablica
+            setLoading(false);
+        } catch (error) {
+            console.error('Błąd podczas pobierania wiadomości:', error);
+            setError('Nie udało się pobrać wiadomości');
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchNews();
+    }, []);
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
@@ -93,18 +109,18 @@ function NewsPage() {
                 {/* Nagłówek strony */}
                 <div className="info-section">
                     <h2 style={{ fontSize: '32px', marginBottom: '10px' }}>
-                        500 - Najnowsze Wiadomości
+                        102 - Najnowsze Wiadomości
                     </h2>
                     <p style={{ fontSize: '12px', color: '#00aa00' }}>
-                        Kategoria: NEWS | Dane na żywo z NewsData API
+                        Kategoria: NEWS | Dane z Backend API
                     </p>
                 </div>
 
                 {/* ASCII Art */}
                 <div className="ascii-art" style={{ textAlign: 'center', margin: '20px 0', fontSize: '14px' }}>
-                    {`╔═══════════════════════════════════╗
+                    {`╔══════════════════════════════════╗
 ║      WIADOMOŚCI Z POLSKI          ║
-╚═══════════════════════════════════╝`}
+╚══════════════════════════════════╝`}
                 </div>
 
                 {/* Lista wiadomości */}
@@ -119,18 +135,19 @@ function NewsPage() {
                             }}
                         >
                             <h3 style={{
-                                fontSize: '16px',
-                                marginBottom: '8px',
-                                color: '#00ff00'
+                                fontSize: '18px',
+                                marginBottom: '12px',
+                                color: '#00ff00',
+                                lineHeight: '1.4'
                             }}>
-                                ► {article.title}
+                                ▶ {article.title}
                             </h3>
 
                             {article.description && (
                                 <p style={{
-                                    fontSize: '13px',
+                                    fontSize: '14px',
                                     lineHeight: '1.6',
-                                    marginBottom: '10px',
+                                    marginBottom: '15px',
                                     color: '#00dd00'
                                 }}>
                                     {article.description}
@@ -138,28 +155,40 @@ function NewsPage() {
                             )}
 
                             <div style={{
-                                fontSize: '11px',
+                                fontSize: '12px',
                                 color: '#00aa00',
-                                marginTop: '8px'
+                                marginTop: '10px'
                             }}>
                                 {article.pubDate && (
-                                    <span>📅 {formatDate(article.pubDate)}</span>
+                                    <div style={{ marginBottom: '5px' }}>
+                                        <span>📅 {formatDate(article.pubDate)}</span>
+                                    </div>
                                 )}
                                 {article.source_id && (
-                                    <span style={{ marginLeft: '15px' }}>
-                                        📰 {article.source_id}
-                                    </span>
+                                    <div style={{ marginBottom: '5px' }}>
+                                        <span>📰 Źródło: {article.source_id}</span>
+                                    </div>
+                                )}
+                                {article.keywords && article.keywords.length > 0 && (
+                                    <div style={{ marginBottom: '5px' }}>
+                                        <span>🏷️ Tagi: {article.keywords.join(', ')}</span>
+                                    </div>
+                                )}
+                                {article.category && article.category.length > 0 && (
+                                    <div>
+                                        <span>📂 Kategorie: {article.category.join(', ')}</span>
+                                    </div>
                                 )}
                             </div>
 
                             {article.link && (
-                                <div style={{ marginTop: '8px' }}>
+                                <div style={{ marginTop: '12px' }}>
                                     <a
                                         href={article.link}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         style={{
-                                            fontSize: '11px',
+                                            fontSize: '12px',
                                             color: '#00aaff',
                                             textDecoration: 'underline'
                                         }}
@@ -171,12 +200,18 @@ function NewsPage() {
                         </div>
                     ))}
 
-                    <div style={{ marginTop: '20px', padding: '15px', border: '1px solid #00aa00', backgroundColor: '#0a0a0a' }}>
+                    <div style={{
+                        marginTop: '20px',
+                        padding: '15px',
+                        border: '1px solid #00aa00',
+                        backgroundColor: '#0a0a0a',
+                        textAlign: 'center'
+                    }}>
                         <p style={{ fontSize: '12px', color: '#00aa00' }}>
-                            Wyświetlono {news.length} najnowszych wiadomości
+                            📡 Dane pobrane z Backend API (Spring Boot)
                         </p>
                         <p style={{ fontSize: '12px', color: '#00aa00', marginTop: '5px' }}>
-                            Źródło: NewsData.io
+                            🌐 Źródło: NewsData.io | Ostatnia aktualizacja: {new Date().toLocaleString('pl-PL')}
                         </p>
                     </div>
                 </div>
