@@ -23,12 +23,11 @@ function PageListPage() {
         try {
             const allPages = await getAllPages();
 
-            // Strony integracji (nie są w bazie)
             const integrationPages = [
-                { id: 'int-300', pageNumber: 300, title: 'Prognoza Pogody (LIVE)', category: 'WEATHER' },
-                { id: 'int-400', pageNumber: 400, title: 'Kursy Walut (LIVE)', category: 'FINANCE' },
-                { id: 'int-500', pageNumber: 500, title: 'Najnowsze Wiadomości (LIVE)', category: 'NEWS' },
-                { id: 'int-600', pageNumber: 600, title: 'Oferty Pracy (LIVE)', category: 'JOBS' }
+                { id: 'int-502', pageNumber: 502, title: 'Prognoza Pogody (LIVE)', category: { category: 'Pogoda' } },
+                { id: 'int-801', pageNumber: 801, title: 'Kursy Walut (LIVE)', category: { category: 'Finanse' } },
+                { id: 'int-102', pageNumber: 102, title: 'Najnowsze Wiadomości (LIVE)', category: { category: 'Wiadomości' } },
+                { id: 'int-302', pageNumber: 302, title: 'Wyniki Lotto (LIVE)', category: { category: 'Gry losowe' } }
             ];
 
             const combinedPages = [...allPages, ...integrationPages];
@@ -89,7 +88,6 @@ function PageListPage() {
                     <p>Kliknij na stronę aby ją wyświetlić</p>
                 </div>
 
-                {/* Lista stron */}
                 <div className="page-list">
                     {pages.map((page) => (
                         <div
@@ -99,19 +97,19 @@ function PageListPage() {
                         >
                             <div className="page-number">{page.pageNumber}</div>
                             <div className="page-title">{page.title}</div>
-                            <div className="page-category">{page.category}</div>
+                            <div className="page-category">
+                                {typeof page.category === 'object' ? page.category.category : page.category}
+                            </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Podsumowanie */}
                 <div className="info-section" style={{ marginTop: '20px' }}>
                     <p style={{ fontSize: '12px', textAlign: 'center' }}>
                         Łącznie stron: <strong>{pages.length}</strong>
                     </p>
                 </div>
 
-                {/* Przycisk powrotu do strony głównej */}
                 <div className="button-group" style={{ marginTop: '30px' }}>
                     <button className="btn" onClick={() => navigate('/')}>
                         ← Strona główna
