@@ -22,16 +22,32 @@ Aplikacja **Teletext** to nowoczesny system zarządzania treścią w stylu retro
 
 ## 🌐 Integracje API
 
-### ✅ Działające (frontend):
-- **🌤️ Pogoda** (Strona 300) - Open Meteo API - aktualna temperatura i warunki pogodowe
-- **💱 Kursy walut** (Strona 400) - NBP API - kursy EUR, USD, GBP, CHF
-- **📰 Wiadomości** (Strona 500) - NewsData API - najnowsze wiadomości z Polski
-- **💼 Oferty pracy** (Strona 600) - Jooble API - wyszukiwarka ofert IT
+Aplikacja integruje się z zewnętrznymi API poprzez warstwę backendową. Frontend komunikuje się wyłącznie z endpointami backendu (Spring Boot), który z kolei pobiera dane z zewnętrznych serwisów.
 
-### ⏳ Wymagające backendu (CORS block):
-- **🎰 Lotto** - wyniki losowania (w planach)
-- **🔮 Horoskop** - horoskop dzienny (w planach)
-- **⚽ Sport** - wyniki sportowe (w planach)
+### ✅ Zaimplementowane integracje:
+
+| Integracja | Status | Strona | Źródło danych | Opis |
+|------------|--------|--------|---------------|------|
+| 🌤️ **Pogoda** | ✅ Działająca | 502 | OpenMeteo API | Prognoza 7-dniowa dla wybranego miasta |
+| 📰 **Wiadomości** | ✅ Działająca | 102 | NewsData API | Najnowsze artykuły informacyjne |
+| 💱 **Kursy walut** | ✅ Działająca | 801 | NBP API | Aktualne kursy wymiany walut |
+| 🎰 **Lotto** | ✅ Działająca | 302 | Totalizator Sportowy API | Wyniki ostatniego losowania |
+| 💼 **Oferty pracy** | ⏳ W trakcie | 601 | Jooble API | Wyszukiwarka ofert pracy IT |
+| 🔮 **Horoskop** | ⏳ W trakcie | 701 | Horoskop API | Horoskop dzienny dla znaków zodiaku |
+| ⚽ **Tabela ligowa** | ⏳ W trakcie | 201 | Highlightly API | Tabele sportowe |
+| 🏆 **Mecze** | ⏳ W trakcie | 202 | Highlightly API | Wyniki i terminarz meczów |
+| 📺 **Program TV** | ⏳ W trakcie | 401 | TVP API | Ramówka telewizyjna |
+
+### Architektura komunikacji:
+```
+Frontend (React) → Backend API (Spring Boot) → External APIs
+```
+
+Korzyści z pośrednictwa backendu:
+- Bezpieczne przechowywanie kluczy API
+- Możliwość cache'owania odpowiedzi
+- Ujednolicone obsługiwanie błędów
+- Transformacja danych do spójnego formatu
 
 ---
 
@@ -52,13 +68,15 @@ Aplikacja stylizowana na klasyczną telegazetę:
 - **React** 19 + **Vite** - nowoczesny stack
 - **React Router** 6 - routing SPA
 - **Vanilla CSS** - stylizacja bez frameworków
-- **Fetch API** - komunikacja z backendem i zewnętrznymi API
+- **Fetch API** - komunikacja z backendem
 
 ### Backend
 - **Spring Boot** 3.4.1 (Java 21)
 - **PostgreSQL** 17.2 - baza danych
 - **Redis** 8.4.0 - cache
 - **JWT** - autentykacja
+- **WebClient** - komunikacja z zewnętrznymi API
+- **Flyway** - migracje bazy danych
 - **Docker** - konteneryzacja
 
 ---
@@ -134,10 +152,11 @@ teletext-dev/
 │   │   │   └── ProtectedRoute.jsx
 │   │   ├── pages/
 │   │   │   ├── integrations/    # Strony z integracjami API
-│   │   │   │   ├── WeatherPage.jsx
-│   │   │   │   ├── CurrencyPage.jsx
-│   │   │   │   ├── NewsPage.jsx
-│   │   │   │   └── JobsPage.jsx
+│   │   │   │   ├── WeatherPage.jsx    (502)
+│   │   │   │   ├── NewsPage.jsx       (102)
+│   │   │   │   ├── CurrencyPage.jsx   (801)
+│   │   │   │   ├── LotteryPage.jsx    (302)
+│   │   │   │   └── JobsPage.jsx       (601)
 │   │   │   ├── HomePage.jsx
 │   │   │   ├── PageListPage.jsx
 │   │   │   ├── PageViewPage.jsx
@@ -152,8 +171,12 @@ teletext-dev/
 │   ├── src/main/java/.../
 │   │   ├── api/                 # Kontrolery REST
 │   │   ├── config/              # Konfiguracja (Security, CORS)
-│   │   ├── domain/              # Modele, repozytoria, serwisy
-│   │   └── exceptions/
+│   │   ├── integration/         # Serwisy integracji z API
+│   │   ├── teletext/            # Logika biznesowa
+│   │   │   ├── page/            # Zarządzanie stronami
+│   │   │   ├── template/        # Szablony stron
+│   │   │   └── schema/          # Walidacja konfiguracji
+│   │   └── common/
 │   └── Dockerfile
 ├── docker-files/
 │   └── postgres/
@@ -175,10 +198,10 @@ teletext-dev/
 | `/` | Strona główna z nawigacją |
 | `/pages` | Lista wszystkich stron telegazety |
 | `/pages/:pageNumber` | Podgląd konkretnej strony |
-| `/pages/300` | Pogoda (live API) |
-| `/pages/400` | Kursy walut (live API) |
-| `/pages/500` | Wiadomości (live API) |
-| `/pages/600` | Oferty pracy (live API) |
+| `/pages/502` | Pogoda - prognoza 7-dniowa |
+| `/pages/102` | Wiadomości - najnowsze artykuły |
+| `/pages/801` | Kursy walut - EUR/PLN z NBP |
+| `/pages/302` | Lotto - wyniki ostatniego losowania |
 
 ### Panel administratora:
 
@@ -210,15 +233,25 @@ Token JWT przechowywany w `localStorage` jako `jwt_token`.
 ### Backend (localhost:8080):
 
 **Publiczne:**
-- `GET /api/public/pages` - lista stron
-- `GET /api/public/pages/{pageNumber}` - pojedyncza strona
+- `GET /api/public/pages` - lista wszystkich stron
+- `GET /api/public/pages/{pageNumber}` - szczegóły strony z wygenerowaną treścią
 - `GET /api/public/categories` - lista kategorii
 
 **Admin (wymagany JWT):**
-- `POST /api/admin/auth/login` - logowanie
-- `GET /api/admin/stats/pages` - statystyki
+- `POST /api/admin/auth/login` - logowanie (zwraca JWT token)
+- `POST /api/admin/auth/logout` - wylogowanie
+- `POST /api/admin/auth/refresh` - odświeżenie tokenu
+- `GET /api/admin/pages` - lista stron (zarządzanie)
+- `POST /api/admin/pages` - utworzenie nowej strony
+- `PUT /api/admin/pages/{id}` - edycja strony
+- `DELETE /api/admin/pages/{id}` - usunięcie strony
+- `GET /api/admin/templates` - lista szablonów integracji
+- `POST /api/admin/templates` - utworzenie szablonu
+- `GET /api/admin/schemas` - lista schematów konfiguracji
+- `GET /api/admin/schemas/{source}` - schemat dla konkretnego źródła
+- `GET /api/admin/stats/pages` - statystyki odwiedzin
 
-**Dokumentacja:** http://localhost:8080/swagger-ui/index.html
+**Dokumentacja Swagger:** http://localhost:8080/swagger-ui/index.html
 
 ---
 
@@ -240,38 +273,36 @@ REDIS_PASSWORD=redis_pass
 
 ### Klucze API (`.env.webclient`):
 ```env
-# Integracje
+# API URLs
+WEBCLIENT_OPEN_METEO_API_BASE_URL=https://api.open-meteo.com/
+WEBCLIENT_NBP_API_BASE_URL=https://api.nbp.pl/
+WEBCLIENT_NEWS_DATA_API_BASE_URL=https://newsdata.io/
+WEBCLIENT_LOTTO_API_BASE_URL=https://developers.lotto.pl/
+WEBCLIENT_JOOBLE_API_BASE_URL=https://jooble.org/
+WEBCLIENT_HOROSCOPE_API_BASE_URL=https://www.moj-codzienny-horoskop.com/
+WEBCLIENT_HIGHLIGHTLY_API_BASE_URL=https://sports.highlightly.net/
+WEBCLIENT_TVP_API_BASE_URL=https://www.tvp.pl/
+
+# API Secrets
 WEBCLIENT_NEWS_DATA_SECRET=pub_xxxxx
 WEBCLIENT_LOTTO_SECRET=xxxxx
 WEBCLIENT_JOOBLE_SECRET=xxxxx
 WEBCLIENT_HIGHLIGHTLY_SECRET=xxxxx
 ```
-## 📋 TODO
-
-- [ ] Backend endpoints dla Lotto/Horoskop/Sport
-- [ ] CRUD dla stron w panelu admina
-- [ ] Paginacja listy stron
-- [ ] Filtrowanie po kategoriach
-- [ ] Upload obrazów
-- [ ] Testy jednostkowe
-- [ ] CI/CD pipeline
-
----
 
 ## 👥 Autorzy
 
-- [Sebastian Górski](https://github.com/sgorski00/) - Backend
-- [Jakub Grzymisławski](https://github.com/jgrzymislawski/) - Backend
-- [Łukasz Szenkiel](https://github.com/lukaszsz1991/) - Backend
-- [Rafał Wilczewski](https://github.com/Rafal-wq/) - Frontend
+- [Sebastian Górski](https://github.com/sgorski00/) 
+- [Jakub Grzymisławski](https://github.com/jgrzymislawski/)
+- [Łukasz Szenkiel](https://github.com/lukaszsz1991/) 
+- [Rafał Wilczewski](https://github.com/Rafal-wq/) 
 
 ---
 
 ## 📄 Licencja
 
 Projekt wykonywany w ramach kursu *Projektowanie i programowanie systemów internetowych II*  
-Collegium Witelona Uczelnia Państwowa
-
+Collegium Witelona Uczelnia Państwowa w Legnicy
 
 ---
 

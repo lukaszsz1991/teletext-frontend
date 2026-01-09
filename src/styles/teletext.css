@@ -264,9 +264,7 @@ body {
     }
 }
 
-/* ========================================
-   ADMIN LAYOUT STYLES
-   ======================================== */
+/* ADMIN LAYOUT STYLES */
 
 /* Admin Layout Container */
 .admin-layout {
@@ -471,7 +469,7 @@ body {
     }
 }
 
-/* ==================== PAGES TABLE STYLES ==================== */
+/* PAGES TABLE STYLES */
 
 .pages-table-container {
     overflow-x: auto;
@@ -584,7 +582,7 @@ body {
     box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
 }
 
-/* ==================== MODAL STYLES ==================== */
+/* MODAL STYLES */
 
 .modal-overlay {
     position: fixed;
@@ -640,7 +638,7 @@ body {
     }
 }
 
-/* ==================== RESPONSIVE TABLE ==================== */
+/* RESPONSIVE TABLE */
 
 @media (max-width: 768px) {
     .pages-table {
@@ -668,5 +666,143 @@ body {
     .page-category,
     .page-date {
         min-width: 100px;
+    }
+}
+
+/* SPORTS PAGE */
+.sports-info {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #0a0a2e;
+    border: 2px solid #00ff00;
+    text-align: center;
+}
+
+.sports-info p {
+    font-size: 14px;
+    color: #00dd00;
+}
+
+.sports-table {
+    margin: 1.5rem 0;
+    overflow-x: auto;
+}
+
+.sports-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    background-color: #0a0a0a;
+}
+
+.sports-table th {
+    background-color: #00ff00;
+    color: #0a0a2e;
+    padding: 0.6rem 0.4rem;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid #00ff00;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sports-table td {
+    padding: 0.5rem 0.4rem;
+    text-align: center;
+    border: 1px solid #003300;
+    color: #00dd00;
+}
+
+.sports-table .team-name {
+    text-align: left;
+    padding-left: 0.8rem;
+    font-weight: bold;
+}
+
+.sports-table .position {
+    font-weight: bold;
+    width: 50px;
+    color: #00ff00;
+}
+
+.sports-table .points {
+    font-weight: bold;
+    color: #ffff00;
+    font-size: 1.1rem;
+}
+
+/* Kolorowanie pozycji w tabeli */
+.sports-table tr.champions-league td {
+    background-color: rgba(0, 100, 255, 0.15);
+}
+
+.sports-table tr.europa-league td {
+    background-color: rgba(255, 165, 0, 0.15);
+}
+
+.sports-table tr.relegation td {
+    background-color: rgba(255, 0, 0, 0.15);
+}
+
+.sports-legend {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: #0a0a0a;
+    border: 1px solid #00aa00;
+    text-align: center;
+}
+
+.sports-legend p {
+    font-size: 0.85rem;
+    color: #00dd00;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.legend-item.champions-league::before {
+    content: "█";
+    color: #0064ff;
+    font-size: 1.2rem;
+}
+
+.legend-item.europa-league::before {
+    content: "█";
+    color: #ffa500;
+    font-size: 1.2rem;
+}
+
+.legend-item.relegation::before {
+    content: "█";
+    color: #ff0000;
+    font-size: 1.2rem;
+}
+
+/* Responsywność dla małych ekranów */
+@media (max-width: 768px) {
+    .sports-table table {
+        font-size: 0.7rem;
+    }
+
+    .sports-table th,
+    .sports-table td {
+        padding: 0.3rem 0.2rem;
+    }
+
+    .sports-table .team-name {
+        font-size: 0.65rem;
+    }
+
+    .sports-legend p {
+        gap: 1rem;
+        font-size: 0.75rem;
     }
 }
