@@ -80,26 +80,123 @@ function PageViewPage() {
         return page.description || null;
     };
 
-    const getContentToDisplay = () => {
-        // Jeśli content jest stringiem - zwróć go
-        if (typeof page.content === 'string') {
-            return page.content;
-        }
-
-        // Jeśli content jest obiektem z additionalData - zwróć je
-        if (typeof page.content === 'object' && page.content.additionalData) {
-            return page.content.additionalData;
-        }
-
-        // Dla stron MANUAL bez dodatkowej treści
-        if (typeof page.content === 'object' && page.content.source === 'manual') {
-            return null; // Pokaże info placeholder
-        }
-
-        return null;
+    const renderWeatherContent = (dailyWeathers) => {
+        return (
+            <div style={{ marginTop: '20px' }}>
+                {dailyWeathers.map((day, index) => (
+                    <div
+                        key={index}
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            padding: '12px',
+                            borderBottom: '1px solid #00aa00',
+                            fontFamily: 'Courier New, monospace'
+                        }}
+                    >
+                        <div style={{ flex: 1, color: '#00ff00', fontSize: '14px' }}>
+                            📅 {new Date(day.date).toLocaleDateString('pl-PL', {
+                            weekday: 'short',
+                            day: '2-digit',
+                            month: '2-digit'
+                        })}
+                        </div>
+                        <div style={{ flex: 1, textAlign: 'center' }}>
+                            <span style={{ color: '#ff6666', fontSize: '16px', fontWeight: 'bold' }}>
+                                ↑ {day.maxTemperature}{day.maxTemperatureUnit}
+                            </span>
+                        </div>
+                        <div style={{ flex: 1, textAlign: 'right' }}>
+                            <span style={{ color: '#6666ff', fontSize: '16px', fontWeight: 'bold' }}>
+                                ↓ {day.minTemperature}{day.minTemperatureUnit}
+                            </span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
     };
 
-    const contentToDisplay = getContentToDisplay();
+    const renderContent = () => {
+        // String content (np. NEWS)
+        if (typeof page.content === 'string') {
+            return (
+                <pre style={{
+                    whiteSpace: 'pre-wrap',
+                    wordWrap: 'break-word',
+                    fontFamily: 'Courier New, monospace',
+                    fontSize: '14px',
+                    lineHeight: '1.6',
+                    color: '#00dd00'
+                }}>
+{page.content}
+                </pre>
+            );
+        }
+
+        // Object content
+        if (typeof page.content === 'object' && page.content.additionalData) {
+            const additionalData = page.content.additionalData;
+
+            // Pogoda - dailyWeathers array
+            if (additionalData.dailyWeathers && Array.isArray(additionalData.dailyWeathers)) {
+                return renderWeatherContent(additionalData.dailyWeathers);
+            }
+
+            // Inne additionalData jako string
+            if (typeof additionalData === 'string') {
+                return (
+                    <pre style={{
+                        whiteSpace: 'pre-wrap',
+                        wordWrap: 'break-word',
+                        fontFamily: 'Courier New, monospace',
+                        fontSize: '14px',
+                        lineHeight: '1.6',
+                        color: '#00dd00'
+                    }}>
+{additionalData}
+                    </pre>
+                );
+            }
+
+            // Inne obiekty - wyświetl jako JSON (fallback)
+            return (
+                <pre style={{
+                    whiteSpace: 'pre-wrap',
+                    wordWrap: 'break-word',
+                    fontFamily: 'Courier New, monospace',
+                    fontSize: '12px',
+                    lineHeight: '1.6',
+                    color: '#00dd00'
+                }}>
+{JSON.stringify(additionalData, null, 2)}
+                </pre>
+            );
+        }
+
+        // MANUAL bez treści
+        if (typeof page.content === 'object' && page.content.source === 'manual') {
+            return (
+                <div style={{ textAlign: 'center', padding: '40px 20px', border: '1px dashed #00aa00' }}>
+                    <p style={{ color: '#00aa00', fontSize: '14px', marginBottom: '10px' }}>
+                        📄 Strona typu MANUAL
+                    </p>
+                    <p style={{ color: '#007700', fontSize: '12px' }}>
+                        Strona została utworzona przez administratora
+                    </p>
+                    {page.content.createdAt && (
+                        <p style={{ fontSize: '11px', color: '#005500', marginTop: '10px' }}>
+                            Utworzono: {new Date(page.content.createdAt).toLocaleString('pl-PL')}
+                        </p>
+                    )}
+                </div>
+            );
+        }
+
+        // Fallback
+        return <p style={{ textAlign: 'center', color: '#00aa00' }}>Brak treści</p>;
+    };
+
     const description = getDescription();
 
     return (
@@ -108,7 +205,6 @@ function PageViewPage() {
             <div className="container">
                 <Header />
 
-                {/* Numer i tytuł strony */}
                 <div className="info-section">
                     <h2 style={{ fontSize: '32px', marginBottom: '10px' }}>
                         {page.pageNumber} - {getTitle()}
@@ -128,34 +224,8 @@ function PageViewPage() {
                     )}
                 </div>
 
-                {/* Treść strony */}
                 <div className="info-section">
-                    {contentToDisplay ? (
-                        <pre style={{
-                            whiteSpace: 'pre-wrap',
-                            wordWrap: 'break-word',
-                            fontFamily: 'Courier New, monospace',
-                            fontSize: '14px',
-                            lineHeight: '1.6',
-                            color: '#00dd00'
-                        }}>
-{contentToDisplay}
-                        </pre>
-                    ) : (
-                        <div style={{ textAlign: 'center', padding: '40px 20px', border: '1px dashed #00aa00' }}>
-                            <p style={{ color: '#00aa00', fontSize: '14px', marginBottom: '10px' }}>
-                                📄 Strona typu MANUAL
-                            </p>
-                            <p style={{ color: '#007700', fontSize: '12px' }}>
-                                Strona została utworzona przez administratora
-                            </p>
-                            {page.content?.createdAt && (
-                                <p style={{ fontSize: '11px', color: '#005500', marginTop: '10px' }}>
-                                    Utworzono: {new Date(page.content.createdAt).toLocaleString('pl-PL')}
-                                </p>
-                            )}
-                        </div>
-                    )}
+                    {renderContent()}
                 </div>
 
                 <div className="button-group" style={{ marginTop: '30px' }}>

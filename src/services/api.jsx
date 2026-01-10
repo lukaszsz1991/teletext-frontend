@@ -97,7 +97,7 @@ export const getCategories = async () => {
 
 export const getPublicPages = async () => {
     try {
-        const categories = ['NEWS', 'WEATHER', 'LOTTERY', 'SPORTS', 'CURRENCY', 'MISC'];
+        const categories = ['NEWS', 'SPORTS', 'LOTTERY', 'TV', 'WEATHER', 'JOBS', 'HOROSCOPE', 'FINANCE', 'MISC'];
 
         const promises = categories.map(cat =>
             apiClient.get('/public/pages', { params: { category: cat } })
