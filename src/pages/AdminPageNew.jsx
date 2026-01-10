@@ -129,13 +129,6 @@ function AdminPageNew() {
                 <p>{isEditMode ? `Edycja strony ID: ${id}` : 'Tworzenie nowej strony telegazety'}</p>
             </div>
 
-            {isEditMode && (
-                <div className="info-section" style={{ borderColor: '#ffaa00', marginBottom: '20px' }}>
-                    <h3 style={{ color: '#ffaa00' }}>⚠️ Funkcjonalność w budowie</h3>
-                    <p>Kontroler admin do zarządzania stronami nie jest jeszcze zaimplementowany w backendzie.</p>
-                </div>
-            )}
-
             {showSuccess && (
                 <div className="info-section" style={{ borderColor: '#00ff00', marginBottom: '20px' }}>
                     <h3 style={{ color: '#00ff00' }}>✓ Sukces!</h3>

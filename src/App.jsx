@@ -14,6 +14,7 @@ import NewsPage from "./pages/integrations/NewsPage.jsx";
 import JobsPage from "./pages/integrations/JobsPage.jsx";
 import LotteryPage from "./pages/integrations/Lotterypage.jsx";
 import SportsPage from "./pages/integrations/SportsPage.jsx";
+import MatchesPage from "./pages/integrations/Matchespage.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
                 <Route path="/pages/:pageNumber" element={<PageViewPage />} />
                 <Route path="/pages/102" element={<NewsPage />} />
                 <Route path="/pages/201" element={<SportsPage />} />
+                <Route path="/pages/202" element={<MatchesPage />} />
                 <Route path="/pages/302" element={<LotteryPage />} />
                 <Route path="/pages/502" element={<WeatherPage />} />
                 <Route path="/pages/600" element={<JobsPage />} />

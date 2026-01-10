@@ -24,11 +24,12 @@ function PageListPage() {
             const allPages = await getAllPages();
 
             const integrationPages = [
-                { id: 'int-502', pageNumber: 502, title: 'Prognoza Pogody (LIVE)', category: { category: 'Pogoda' } },
-                { id: 'int-801', pageNumber: 801, title: 'Kursy Walut (LIVE)', category: { category: 'Finanse' } },
                 { id: 'int-102', pageNumber: 102, title: 'Najnowsze Wiadomości (LIVE)', category: { category: 'Wiadomości' } },
+                { id: 'int-201', pageNumber: 201, title: 'Tabela Ekstraklasy (LIVE)', category: { category: 'Sport' } },
+                { id: 'int-202', pageNumber: 202, title: 'Mecze Ekstraklasy (LIVE)', category: { category: 'Sport' } },
                 { id: 'int-302', pageNumber: 302, title: 'Wyniki Lotto (LIVE)', category: { category: 'Gry losowe' } },
-                { id: 'int-201', pageNumber: 201, title: 'Tabela Ekstraklasy (LIVE)', category: { category: 'Sport' } }
+                { id: 'int-502', pageNumber: 502, title: 'Prognoza Pogody (LIVE)', category: { category: 'Pogoda' } },
+                { id: 'int-801', pageNumber: 801, title: 'Kursy Walut (LIVE)', category: { category: 'Finanse' } }
             ];
 
             const combinedPages = [...allPages, ...integrationPages];

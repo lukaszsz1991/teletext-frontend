@@ -179,6 +179,9 @@ function SportsPage() {
                     <button className="btn" onClick={fetchSportsData}>
                         🔄 Odśwież tabelę
                     </button>
+                    <button className="btn" onClick={() => navigate('/pages/202')}>
+                        📅 Mecze ligowe
+                    </button>
                 </div>
 
                 <Footer />
