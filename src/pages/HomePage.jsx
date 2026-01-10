@@ -43,9 +43,8 @@ function HomePage() {
                 <h3>📋 Co oferujemy:</h3>
                 <ul className="feature-list">
                     <li>Przegląd struktury numerów telegazety</li>
-                    <li>Zaawansowane wyszukiwanie po tytułach i kategoriach</li>
                     <li>Edytor stron z wsparciem ASCII art</li>
-                    <li>7+ integracji (pogoda, lotto, wyniki Sejmu, oferty pracy, kursy walut, kruszce)</li>
+                    <li>7+ integracji (pogoda, lotto, tabela ekstraklasy, kursy walut, wiadomości)</li>
                     <li>Statystyki odwiedzin i popularności</li>
                     <li>Responsywny design w stylu retro</li>
                 </ul>

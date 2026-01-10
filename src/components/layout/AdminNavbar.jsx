@@ -49,17 +49,6 @@ function AdminNavbar() {
                     <span className="navbar-text">{formatTime()}</span>
                 </div>
 
-                {/* Temperatura */}
-                <div className="navbar-item">
-                    <span className="navbar-icon">🌡️</span>
-                    <span className="navbar-text">{temperature}</span>
-                </div>
-
-                {/* Święto */}
-                <div className="navbar-item">
-                    <span className="navbar-icon">🎉</span>
-                    <span className="navbar-text">{holiday}</span>
-                </div>
             </div>
         </div>
     );

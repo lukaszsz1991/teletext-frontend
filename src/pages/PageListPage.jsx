@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllPages } from '../services/api';
+import { getPublicPages } from '../services/api';
 import Scanlines from '../components/layout/Scanlines';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
@@ -21,7 +21,7 @@ function PageListPage() {
         setError(null);
 
         try {
-            const allPages = await getAllPages();
+            const pages = await getPublicPages();
 
             const integrationPages = [
                 { id: 'int-102', pageNumber: 102, title: 'Najnowsze Wiadomości (LIVE)', category: { category: 'Wiadomości' } },
@@ -32,7 +32,7 @@ function PageListPage() {
                 { id: 'int-801', pageNumber: 801, title: 'Kursy Walut (LIVE)', category: { category: 'Finanse' } }
             ];
 
-            const combinedPages = [...allPages, ...integrationPages];
+            const combinedPages = [...pages, ...integrationPages];
             const sortedPages = combinedPages.sort((a, b) => a.pageNumber - b.pageNumber);
             setPages(sortedPages);
         } catch (err) {

@@ -23,7 +23,6 @@ function App() {
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/pages" element={<PageListPage />} />
-                <Route path="/pages/:pageNumber" element={<PageViewPage />} />
                 <Route path="/pages/102" element={<NewsPage />} />
                 <Route path="/pages/201" element={<SportsPage />} />
                 <Route path="/pages/202" element={<MatchesPage />} />
@@ -31,6 +30,7 @@ function App() {
                 <Route path="/pages/502" element={<WeatherPage />} />
                 <Route path="/pages/600" element={<JobsPage />} />
                 <Route path="/pages/801" element={<CurrencyPage />} />
+                <Route path="/pages/:pageNumber" element={<PageViewPage />} />
 
                 <Route path="/admin/login" element={<AdminLogin />} />
 

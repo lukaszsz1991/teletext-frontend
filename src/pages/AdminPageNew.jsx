@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/layout/AdminLayout';
-import { getNextAvailablePageNumber, createPage, getCategories } from '../services/api';
+import { createPage } from '../services/api';
 import '../styles/teletext.css';
 
 function AdminPageNew() {
@@ -12,28 +12,14 @@ function AdminPageNew() {
     const [formData, setFormData] = useState({
         pageNumber: '',
         title: '',
-        category: '',
+        category: 'MISC',
+        description: '',
         content: ''
     });
 
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
-    const [loadingNextNumber, setLoadingNextNumber] = useState(false);
-    const [categories, setCategories] = useState([]);
-
-    useEffect(() => {
-        fetchCategories();
-    }, []);
-
-    const fetchCategories = async () => {
-        try {
-            const data = await getCategories();
-            setCategories(data);
-        } catch (error) {
-            setCategories([]);
-        }
-    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -44,22 +30,6 @@ function AdminPageNew() {
         }
     };
 
-    const handleFillNextNumber = async () => {
-        setLoadingNextNumber(true);
-        try {
-            const { nextNumber } = await getNextAvailablePageNumber();
-            setFormData(prev => ({ ...prev, pageNumber: nextNumber }));
-
-            if (errors.pageNumber) {
-                setErrors(prev => ({ ...prev, pageNumber: '' }));
-            }
-        } catch (error) {
-            alert('Nie udało się pobrać wolnego numeru strony');
-        } finally {
-            setLoadingNextNumber(false);
-        }
-    };
-
     const validateForm = () => {
         const newErrors = {};
 
@@ -67,8 +37,8 @@ function AdminPageNew() {
             newErrors.pageNumber = 'Numer strony jest wymagany';
         } else {
             const pageNum = parseInt(formData.pageNumber);
-            if (isNaN(pageNum) || pageNum < 100 || pageNum > 999) {
-                newErrors.pageNumber = 'Numer strony musi być liczbą całkowitą od 100 do 999';
+            if (isNaN(pageNum) || pageNum < 900 || pageNum > 999) {
+                newErrors.pageNumber = 'Numer strony musi być od 900 do 999 (kategoria MISC)';
             }
         }
 
@@ -78,8 +48,8 @@ function AdminPageNew() {
             newErrors.title = 'Tytuł może zawierać maksymalnie 50 znaków';
         }
 
-        if (!formData.category) {
-            newErrors.category = 'Kategoria jest wymagana';
+        if (!formData.description || formData.description.trim().length === 0) {
+            newErrors.description = 'Opis strony jest wymagany';
         }
 
         if (!formData.content || formData.content.trim().length === 0) {
@@ -98,9 +68,11 @@ function AdminPageNew() {
         setLoading(true);
         try {
             const pageData = {
+                type: 'MANUAL',
                 pageNumber: parseInt(formData.pageNumber),
                 title: formData.title.trim(),
                 category: formData.category,
+                description: formData.description.trim(),
                 content: formData.content
             };
 
@@ -112,7 +84,9 @@ function AdminPageNew() {
             }, 2000);
 
         } catch (error) {
-            alert('Wystąpił błąd podczas tworzenia strony. Spróbuj ponownie.');
+            console.error('Error creating page:', error);
+            const errorMsg = error.response?.data?.detail || error.message || 'Wystąpił błąd podczas tworzenia strony';
+            alert('Błąd: ' + errorMsg);
         } finally {
             setLoading(false);
         }
@@ -127,6 +101,16 @@ function AdminPageNew() {
             <div className="header">
                 <h1>{isEditMode ? 'EDYTUJ STRONĘ' : 'DODAJ NOWĄ STRONĘ'}</h1>
                 <p>{isEditMode ? `Edycja strony ID: ${id}` : 'Tworzenie nowej strony telegazety'}</p>
+            </div>
+
+            {/* Ważna informacja o ograniczeniach */}
+            <div className="info-section" style={{ borderColor: '#ffaa00', marginBottom: '20px', backgroundColor: '#2a2a0a' }}>
+                <h3 style={{ color: '#ffaa00' }}>ℹ️ Ważne informacje</h3>
+                <ul className="feature-list">
+                    <li>Strony MANUAL mogą być tworzone tylko w kategorii <strong>MISC (Różne)</strong></li>
+                    <li>Dostępny zakres numerów: <strong>900-999</strong></li>
+                    <li>Wszystkie pola są obowiązkowe</li>
+                </ul>
             </div>
 
             {showSuccess && (
@@ -145,30 +129,22 @@ function AdminPageNew() {
 
                             <div style={{ marginBottom: '20px' }}>
                                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px' }}>
-                                    Numer strony (100-999)
+                                    Numer strony (900-999) *
                                 </label>
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    <input
-                                        type="number"
-                                        name="pageNumber"
-                                        value={formData.pageNumber}
-                                        onChange={handleInputChange}
-                                        min="100"
-                                        max="999"
-                                        className="btn"
-                                        style={{ flex: 1, textAlign: 'left', padding: '10px' }}
-                                        placeholder="Wpisz numer"
-                                    />
-                                    <button
-                                        type="button"
-                                        className="btn"
-                                        onClick={handleFillNextNumber}
-                                        disabled={loadingNextNumber}
-                                        style={{ minWidth: '180px' }}
-                                    >
-                                        {loadingNextNumber ? 'Ładowanie...' : '↓ Wolny numer'}
-                                    </button>
-                                </div>
+                                <input
+                                    type="number"
+                                    name="pageNumber"
+                                    value={formData.pageNumber}
+                                    onChange={handleInputChange}
+                                    min="900"
+                                    max="999"
+                                    className="btn"
+                                    style={{ width: '100%', textAlign: 'left', padding: '10px' }}
+                                    placeholder="Wpisz numer (np. 950)"
+                                />
+                                <p style={{ fontSize: '10px', color: '#00aa00', marginTop: '5px' }}>
+                                    💡 Przykład: 950, 951, 999
+                                </p>
                                 {errors.pageNumber && (
                                     <p style={{ color: '#ff0000', fontSize: '11px', marginTop: '5px' }}>
                                         {errors.pageNumber}
@@ -178,7 +154,7 @@ function AdminPageNew() {
 
                             <div style={{ marginBottom: '20px' }}>
                                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px' }}>
-                                    Tytuł strony (max 50 znaków)
+                                    Tytuł strony (max 50 znaków) *
                                 </label>
                                 <input
                                     type="text"
@@ -202,32 +178,50 @@ function AdminPageNew() {
 
                             <div style={{ marginBottom: '20px' }}>
                                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px' }}>
-                                    Kategoria
+                                    Kategoria *
                                 </label>
-                                <select
-                                    name="category"
-                                    value={formData.category}
+                                <div style={{
+                                    padding: '10px',
+                                    border: '2px solid #00aa00',
+                                    backgroundColor: '#0a0a2e',
+                                    textAlign: 'center'
+                                }}>
+                                    <strong style={{ color: '#ffff00', fontSize: '16px' }}>MISC (Różne)</strong>
+                                    <p style={{ fontSize: '11px', color: '#00aa00', marginTop: '5px' }}>
+                                        Jedyna dostępna kategoria dla stron MANUAL
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px' }}>
+                                    Opis strony *
+                                </label>
+                                <textarea
+                                    name="description"
+                                    value={formData.description}
                                     onChange={handleInputChange}
+                                    rows="3"
                                     className="btn"
-                                    style={{ width: '100%', padding: '10px' }}
-                                >
-                                    <option value="">-- Wybierz kategorię --</option>
-                                    {categories.map((cat) => (
-                                        <option key={cat.originalName} value={cat.originalName}>
-                                            {cat.category}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.category && (
+                                    style={{
+                                        width: '100%',
+                                        textAlign: 'left',
+                                        padding: '10px',
+                                        fontFamily: 'Courier New, monospace',
+                                        resize: 'vertical'
+                                    }}
+                                    placeholder="Krótki opis strony..."
+                                />
+                                {errors.description && (
                                     <p style={{ color: '#ff0000', fontSize: '11px', marginTop: '5px' }}>
-                                        {errors.category}
+                                        {errors.description}
                                     </p>
                                 )}
                             </div>
 
                             <div style={{ marginBottom: '20px' }}>
                                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px' }}>
-                                    Treść strony (obsługa ASCII art)
+                                    Treść strony (obsługa ASCII art) *
                                 </label>
                                 <textarea
                                     name="content"
@@ -303,14 +297,23 @@ function AdminPageNew() {
                                     {formData.title || 'Brak tytułu'}
                                 </div>
 
-                                {formData.category && (
+                                <div style={{
+                                    fontSize: '12px',
+                                    color: '#00aa00',
+                                    marginBottom: '10px',
+                                    textTransform: 'uppercase'
+                                }}>
+                                    Kategoria: Różne (MISC)
+                                </div>
+
+                                {formData.description && (
                                     <div style={{
-                                        fontSize: '12px',
-                                        color: '#00aa00',
+                                        fontSize: '11px',
+                                        color: '#00aaaa',
                                         marginBottom: '15px',
-                                        textTransform: 'uppercase'
+                                        fontStyle: 'italic'
                                     }}>
-                                        Kategoria: {categories.find(c => c.originalName === formData.category)?.category || formData.category}
+                                        {formData.description}
                                     </div>
                                 )}
 

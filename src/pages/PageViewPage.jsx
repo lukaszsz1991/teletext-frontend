@@ -65,6 +65,43 @@ function PageViewPage() {
         );
     }
 
+    // Obsługa różnych struktur content
+    const getTitle = () => {
+        if (typeof page.content === 'object' && page.content.title) {
+            return page.content.title;
+        }
+        return page.title || 'Bez tytułu';
+    };
+
+    const getDescription = () => {
+        if (typeof page.content === 'object' && page.content.description) {
+            return page.content.description;
+        }
+        return page.description || null;
+    };
+
+    const getContentToDisplay = () => {
+        // Jeśli content jest stringiem - zwróć go
+        if (typeof page.content === 'string') {
+            return page.content;
+        }
+
+        // Jeśli content jest obiektem z additionalData - zwróć je
+        if (typeof page.content === 'object' && page.content.additionalData) {
+            return page.content.additionalData;
+        }
+
+        // Dla stron MANUAL bez dodatkowej treści
+        if (typeof page.content === 'object' && page.content.source === 'manual') {
+            return null; // Pokaże info placeholder
+        }
+
+        return null;
+    };
+
+    const contentToDisplay = getContentToDisplay();
+    const description = getDescription();
+
     return (
         <>
             <Scanlines />
@@ -74,23 +111,53 @@ function PageViewPage() {
                 {/* Numer i tytuł strony */}
                 <div className="info-section">
                     <h2 style={{ fontSize: '32px', marginBottom: '10px' }}>
-                        {page.pageNumber} - {page.title}
+                        {page.pageNumber} - {getTitle()}
                     </h2>
+                    {description && (
+                        <p style={{ fontSize: '13px', color: '#00aaaa', fontStyle: 'italic', marginBottom: '10px' }}>
+                            {description}
+                        </p>
+                    )}
                     <p style={{ fontSize: '12px', color: '#00aa00' }}>
-                        Kategoria: {page.category}
+                        Kategoria: {typeof page.category === 'object' ? page.category.category : page.category}
                     </p>
+                    {page.type && (
+                        <p style={{ fontSize: '11px', color: '#007700', marginTop: '5px' }}>
+                            Typ: {page.type}
+                        </p>
+                    )}
                 </div>
 
                 {/* Treść strony */}
                 <div className="info-section">
-                    {page.content && page.content.map((item) => (
-                        <p key={item.id} style={{ marginBottom: '15px', lineHeight: '1.6' }}>
-                            {item.content}
-                        </p>
-                    ))}
+                    {contentToDisplay ? (
+                        <pre style={{
+                            whiteSpace: 'pre-wrap',
+                            wordWrap: 'break-word',
+                            fontFamily: 'Courier New, monospace',
+                            fontSize: '14px',
+                            lineHeight: '1.6',
+                            color: '#00dd00'
+                        }}>
+{contentToDisplay}
+                        </pre>
+                    ) : (
+                        <div style={{ textAlign: 'center', padding: '40px 20px', border: '1px dashed #00aa00' }}>
+                            <p style={{ color: '#00aa00', fontSize: '14px', marginBottom: '10px' }}>
+                                📄 Strona typu MANUAL
+                            </p>
+                            <p style={{ color: '#007700', fontSize: '12px' }}>
+                                Strona została utworzona przez administratora
+                            </p>
+                            {page.content?.createdAt && (
+                                <p style={{ fontSize: '11px', color: '#005500', marginTop: '10px' }}>
+                                    Utworzono: {new Date(page.content.createdAt).toLocaleString('pl-PL')}
+                                </p>
+                            )}
+                        </div>
+                    )}
                 </div>
 
-                {/* Przyciski nawigacji */}
                 <div className="button-group" style={{ marginTop: '30px' }}>
                     <button className="btn" onClick={() => navigate('/pages')}>
                         ← Powrót do listy
