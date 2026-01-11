@@ -1,0 +1,53 @@
+worker_processes auto;
+
+events {
+  worker_connections 1024;
+}
+
+http {
+  log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                  '$status $body_bytes_sent "$http_referer" '
+                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+  error_log /dev/stderr warn;
+  access_log /dev/stdout main;
+
+  include mime.types;
+  default_type application/octet-stream;
+
+  server {
+    listen 80;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location / {
+      try_files $uri $uri/ /index.html;
+    }
+
+    # api reverse proxy
+    location /api/ {
+      proxy_pass ${BACKEND_URL}/api/; # Do rozważenia czy można to przekazać z env (BACKEND_URL i BACKEND_PORT)
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Swagger
+    location /swagger-ui/ {
+      proxy_pass ${BACKEND_URL}/swagger-ui/;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /v3/api-docs/ {
+      proxy_pass ${BACKEND_URL}/v3/api-docs/;
+      proxy_set_header Host $host;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+    }
+   }
+}

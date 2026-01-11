@@ -1,0 +1,55 @@
+name: Deploy Frontend to GCP
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Auth to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up GCP SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: composite-drive-483612-v1
+          install_components: docker-credential-gcr
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker europe-central2-docker.pkg.dev
+
+      - name: Build & Push Image
+        run: |
+          docker build -t europe-central2-docker.pkg.dev/composite-drive-483612-v1/teletext-frontend/frontend-image:${{ github.ref_name }} .
+          docker push europe-central2-docker.pkg.dev/composite-drive-483612-v1/teletext-frontend/frontend-image:${{ github.ref_name }}
+
+      - name: Tag image as prod
+        run: |
+          docker tag europe-central2-docker.pkg.dev/composite-drive-483612-v1/teletext-frontend/frontend-image:${{ github.ref_name }} \
+                     europe-central2-docker.pkg.dev/composite-drive-483612-v1/teletext-frontend/frontend-image:prod
+          docker push europe-central2-docker.pkg.dev/composite-drive-483612-v1/teletext-frontend/frontend-image:prod
+
+      - name: Deploy on VM
+        uses: appleboy/ssh-action@v1.2.4
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            docker pull europe-central2-docker.pkg.dev/composite-drive-483612-v1/teletext-frontend/frontend-image:prod
+            docker stop teletext-frontend || true
+            docker rm teletext-frontend || true
+            docker run -d \
+              --name teletext-frontend \
+              --env-file /opt/teletext.env \
+              -p 80:80 \
+              --restart unless-stopped \
+              europe-central2-docker.pkg.dev/composite-drive-483612-v1/teletext-frontend/frontend-image:prod

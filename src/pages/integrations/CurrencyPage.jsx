@@ -5,6 +5,8 @@ import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import '../../styles/teletext.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function CurrencyPage() {
     const navigate = useNavigate();
     const [currencyData, setCurrencyData] = useState(null);
@@ -16,7 +18,7 @@ function CurrencyPage() {
         setError(null);
 
         try {
-            const response = await fetch('http://localhost:8080/api/public/pages/801');
+            const response = await fetch(`${API_BASE_URL}/public/pages/801`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

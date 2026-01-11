@@ -5,6 +5,8 @@ import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import '../../styles/teletext.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function NewsPage() {
     const navigate = useNavigate();
     const [news, setNews] = useState([]);
@@ -18,7 +20,7 @@ function NewsPage() {
 
         try {
             // Pobierz dane z backendu zamiast bezpośrednio z NewsData API
-            const response = await fetch('http://localhost:8080/api/public/pages/102');
+            const response = await fetch(`${API_BASE_URL}/public/pages/102`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

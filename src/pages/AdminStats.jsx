@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/layout/AdminLayout';
 import '../styles/teletext.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function AdminStats() {
     const navigate = useNavigate();
     const [stats, setStats] = useState([]);
@@ -20,7 +22,7 @@ function AdminStats() {
 
         try {
             const token = localStorage.getItem('jwt_token');
-            const response = await fetch('http://localhost:8080/api/admin/stats/pages?size=10&page=1&includeDetails=false', {
+            const response = await fetch(`${API_BASE_URL}/admin/stats/pages?size=10&page=1&includeDetails=false`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
