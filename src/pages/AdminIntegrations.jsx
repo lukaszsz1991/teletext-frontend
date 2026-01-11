@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/layout/AdminLayout';
 import '../styles/teletext.css';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 function AdminIntegrations() {
     const navigate = useNavigate();
