@@ -31,11 +31,11 @@ function PagesList() {
 
     const handlePreview = (pageNumber) => {
         // Otwórz podgląd w nowej karcie
-        window.open(`/page/${pageNumber}`, '_blank');
+        window.open(`/pages/${pageNumber}`, '_blank');
     };
 
     const handleEdit = (id) => {
-        // Przekierowanie do edycji (placeholder - backend jeszcze nie ma tego endpointu)
+        // Przekierowanie do edycji
         navigate(`/admin/pages/edit/${id}`);
     };
 
@@ -80,10 +80,10 @@ function PagesList() {
         return (
             <div className="info-section" style={{ textAlign: 'center' }}>
                 <div className="ascii-art" style={{ margin: '30px 0' }}>
-                    {`┌────────────────────────────┐
-│   ŁADOWANIE DANYCH...      │
-│   Proszę czekać            │
-└────────────────────────────┘`}
+                    {`┌──────────────────────────────┐
+│   ŁADOWANIE DANYCH...        │
+│   Proszę czekać              │
+└──────────────────────────────┘`}
                 </div>
                 <p style={{ marginTop: '20px' }}>Pobieranie listy stron z serwera...</p>
             </div>
@@ -94,10 +94,10 @@ function PagesList() {
         return (
             <div className="info-section" style={{ textAlign: 'center', borderColor: '#ff0000', color: '#ff0000' }}>
                 <div className="ascii-art" style={{ margin: '30px 0', color: '#ff0000' }}>
-                    {`┌────────────────────────────┐
-│   ⚠ BŁĄD POŁĄCZENIA ⚠      │
-│   Nie można pobrać danych  │
-└────────────────────────────┘`}
+                    {`┌──────────────────────────────┐
+│   ⚠ BŁĄD POŁĄCZENIA ⚠        │
+│   Nie można pobrać danych    │
+└──────────────────────────────┘`}
                 </div>
                 <p style={{ marginTop: '20px' }}>{error}</p>
                 <button className="btn" onClick={fetchPages} style={{ marginTop: '20px' }}>
@@ -111,10 +111,10 @@ function PagesList() {
         return (
             <div className="info-section" style={{ textAlign: 'center' }}>
                 <div className="ascii-art" style={{ margin: '30px 0' }}>
-                    {`┌────────────────────────────┐
-│   BRAK STRON               │
-│   Dodaj pierwszą stronę    │
-└────────────────────────────┘`}
+                    {`┌──────────────────────────────┐
+│   BRAK STRON                 │
+│   Dodaj pierwszą stronę      │
+└──────────────────────────────┘`}
                 </div>
                 <p style={{ marginTop: '20px' }}>Nie znaleziono żadnych stron w systemie.</p>
                 <button className="btn" onClick={() => navigate('/admin/pages/new')} style={{ marginTop: '20px' }}>
@@ -143,7 +143,9 @@ function PagesList() {
                         <tr key={page.id}>
                             <td className="page-number">{page.pageNumber}</td>
                             <td className="page-title">{page.title}</td>
-                            <td className="page-category">{page.category}</td>
+                            <td className="page-category">
+                                {typeof page.category === 'object' ? page.category.category : page.category}
+                            </td>
                             <td className="page-date">{formatDate(page.updatedAt)}</td>
                             <td className="page-actions">
                                 <button
@@ -188,7 +190,7 @@ function PagesList() {
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="ascii-art" style={{ textAlign: 'center', margin: '20px 0' }}>
                             {`┌─────────────────────────────────┐
-│   ⚠ POTWIERDZENIE USUNIĘCIA ⚠   │
+│   ⚠ POTWIERDZENIE USUNIĘCIA ⚠    │
 └─────────────────────────────────┘`}
                         </div>
                         <p style={{ textAlign: 'center', margin: '20px 0' }}>
@@ -197,7 +199,7 @@ function PagesList() {
                         <div className="info-section" style={{ margin: '20px 0' }}>
                             <p><strong>Numer:</strong> {deleteConfirm.pageNumber}</p>
                             <p><strong>Tytuł:</strong> {deleteConfirm.title}</p>
-                            <p><strong>Kategoria:</strong> {deleteConfirm.category}</p>
+                            <p><strong>Kategoria:</strong> {typeof deleteConfirm.category === 'object' ? deleteConfirm.category.category : deleteConfirm.category}</p>
                         </div>
                         <div className="button-group" style={{ marginTop: '20px' }}>
                             <button className="btn btn-delete" onClick={handleDeleteConfirm}>

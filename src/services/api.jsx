@@ -32,7 +32,8 @@ apiClient.interceptors.response.use(
             localStorage.removeItem('jwt_token');
             localStorage.removeItem('user_email');
 
-            if (window.location.pathname !== '/admin/login') {
+            // Tylko przekieruj jeśli jesteśmy w obszarze admina
+            if (window.location.pathname.startsWith('/admin') && window.location.pathname !== '/admin/login') {
                 window.location.href = '/admin/login';
             }
         }
@@ -94,26 +95,19 @@ export const getCategories = async () => {
     }
 };
 
-// PAGES
-
-export const getAllPages = async (category = 'NEWS', includeInactive = false) => {
+export const getPublicPages = async () => {
     try {
-        // Publicznu endpoint
-        const response = await apiClient.get('/public/pages', {
-            params: { category }
-        });
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
-};
+        const categories = ['NEWS', 'SPORTS', 'LOTTERY', 'TV', 'WEATHER', 'JOBS', 'HOROSCOPE', 'FINANCE', 'MISC'];
 
-export const getPublicPages = async (category) => {
-    try {
-        const response = await apiClient.get('/public/pages', {
-            params: { category }
-        });
-        return response.data;
+        const promises = categories.map(cat =>
+            apiClient.get('/public/pages', { params: { category: cat } })
+                .catch(() => ({ data: [] })) // Ignoruj błędy
+        );
+
+        const results = await Promise.all(promises);
+        const allPages = results.flatMap(r => r.data || []);
+
+        return allPages;
     } catch (error) {
         throw error;
     }
@@ -128,12 +122,28 @@ export const getPageByNumber = async (pageNumber) => {
     }
 };
 
+// PAGES - ADMIN (wymaga tokena JWT)
+
+export const getAllPages = async (includeInactive = false) => {
+    try {
+        const response = await apiClient.get('/admin/pages', {
+            params: includeInactive ? { includeInactive } : {}
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const createPage = async (pageData) => {
     try {
         const response = await apiClient.post('/admin/pages', {
+            type: pageData.type || 'MANUAL',
             pageNumber: pageData.pageNumber,
             title: pageData.title,
-            categoryName: pageData.category
+            category: pageData.category,
+            description: pageData.description,
+            content: pageData.content
         });
         return response.data;
     } catch (error) {
@@ -163,14 +173,14 @@ export const deletePage = async (pageId) => {
     }
 };
 
-// UTILITY - jeżeli backend wspiera
+// UTILITY
 
 export const getNextAvailablePageNumber = async () => {
     try {
-        const allPages = await getAllPages('NEWS', false);
+        const allPages = await getAllPages(false);
         const usedNumbers = allPages.map(p => p.pageNumber);
 
-        for (let num = 100; num <= 999; num++) {
+        for (let num = 900; num <= 999; num++) {
             if (!usedNumbers.includes(num)) {
                 return { nextNumber: num };
             }

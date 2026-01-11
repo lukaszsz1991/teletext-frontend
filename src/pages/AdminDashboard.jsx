@@ -5,92 +5,167 @@ import '../styles/teletext.css';
 
 function AdminDashboard() {
     const navigate = useNavigate();
-    const [userEmail, setUserEmail] = useState('');
+    const [stats, setStats] = useState({
+        totalPages: 0,
+        totalViews: 0,
+        activeIntegrations: 0,
+        totalTemplates: 0
+    });
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         // Sprawdź czy użytkownik jest zalogowany
         const token = localStorage.getItem('jwt_token');
-        const email = localStorage.getItem('user_email');
-
         if (!token) {
-            // Jeśli brak tokena, przekieruj do logowania
             navigate('/admin/login');
-        } else {
-            setUserEmail(email || 'Administrator');
+            return;
         }
+
+        fetchDashboardData();
     }, [navigate]);
+
+    const fetchDashboardData = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('jwt_token');
+
+            // Pobierz strony
+            const pagesResponse = await fetch('http://localhost:8080/api/admin/pages', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const pages = await pagesResponse.json();
+
+            // Pobierz statystyki
+            const statsResponse = await fetch('http://localhost:8080/api/admin/stats/pages?size=100', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const statsData = await statsResponse.json();
+            const totalViews = statsData.reduce((sum, page) => sum + page.views, 0);
+
+            // Pobierz templates
+            const templatesResponse = await fetch('http://localhost:8080/api/admin/templates', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const templates = await templatesResponse.json();
+            const activeTemplates = templates.filter(t => t.active !== false).length;
+
+            // Grupuj po source żeby policzyć integracje
+            const uniqueSources = [...new Set(templates.map(t => t.source))];
+
+            setStats({
+                totalPages: pages.length,
+                totalViews: totalViews,
+                activeIntegrations: uniqueSources.length,
+                totalTemplates: templates.length
+            });
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <AdminLayout>
             {/* Header */}
             <div className="header">
-                <h1>DASHBOARD</h1>
+                <h1>📊 DASHBOARD</h1>
                 <p>Panel główny administratora</p>
             </div>
 
-            {/* ASCII Art */}
-            <div className="ascii-art" style={{ textAlign: 'center', margin: '30px 0' }}>
-                {`╔═════════════════════════════════════════╗
-║     PANEL ADMINISTRATORA AKTYWNY        ║
-║                                         ║
-║     ✓ Zalogowano pomyślnie              ║
-║     ✓ Sesja aktywna                     ║
-║     ✓ Uprawnienia: ADMINISTRATOR        ║
-╚═════════════════════════════════════════╝`}
-            </div>
-
-            {/* Grid z opcjami */}
-            <div className="main-grid">
-                <div className="card">
-                    <h2>📄 Zarządzanie Stronami</h2>
-                    <p>Twórz, edytuj i usuwaj strony telegazety</p>
-                    <div className="button-group">
-                        <button className="btn">Lista Stron</button>
-                        <button className="btn">Nowa Strona</button>
-                    </div>
+            {/* Quick Stats */}
+            <div className="dashboard-stats">
+                <div className="stat-box" onClick={() => navigate('/admin/pages')}>
+                    <div className="stat-icon">📄</div>
+                    <div className="stat-value">{loading ? '...' : stats.totalPages}</div>
+                    <div className="stat-label">Stron w systemie</div>
                 </div>
 
-                <div className="card">
-                    <h2>🔗 Integracje</h2>
-                    <p>Zarządzaj integracjami z zewnętrznymi źródłami</p>
-                    <div className="button-group">
-                        <button className="btn">Pogoda</button>
-                        <button className="btn">Waluty</button>
-                    </div>
+                <div className="stat-box" onClick={() => navigate('/admin/stats')}>
+                    <div className="stat-icon">📈️</div>
+                    <div className="stat-value">{loading ? '...' : stats.totalViews}</div>
+                    <div className="stat-label">Łącznie wyświetleń</div>
                 </div>
 
-                <div className="card">
-                    <h2>📊 Statystyki</h2>
-                    <p>Najpopularniejsze strony i statystyki odwiedzin</p>
-                    <div className="button-group">
-                        <button className="btn">Zobacz Stats</button>
-                    </div>
+                <div className="stat-box" onClick={() => navigate('/admin/integrations')}>
+                    <div className="stat-icon">🔌</div>
+                    <div className="stat-value">{loading ? '...' : stats.activeIntegrations}</div>
+                    <div className="stat-label">Aktywne integracje</div>
                 </div>
 
-                <div className="card">
-                    <h2>⚙️ Ustawienia</h2>
-                    <p>Konfiguracja systemu i parametry</p>
-                    <div className="button-group">
-                        <button className="btn">Ustawienia</button>
-                    </div>
+                <div className="stat-box" onClick={() => navigate('/admin/integrations')}>
+                    <div className="stat-icon">📋</div>
+                    <div className="stat-value">{loading ? '...' : stats.totalTemplates}</div>
+                    <div className="stat-label">Templates</div>
                 </div>
             </div>
 
-            {/* Status systemowy */}
-            <div className="info-section">
-                <h3>Status Systemu</h3>
-                <ul className="feature-list">
-                    <li>Backend: Połączono</li>
-                    <li>Baza danych: Aktywna</li>
-                    <li>Integracje: 7/7 działających</li>
-                    <li>Ostatnia aktualizacja: {new Date().toLocaleString('pl-PL')}</li>
-                </ul>
+            {/* Quick Actions */}
+            <div className="info-section" style={{ marginTop: '30px' }}>
+                <h3>🚀 Szybkie Akcje</h3>
+                <div className="quick-actions">
+                    <button
+                        className="quick-action-btn"
+                        onClick={() => navigate('/admin/pages/new')}
+                    >
+                        <span className="action-icon">➕</span>
+                        <span className="action-text">Dodaj nową stronę</span>
+                    </button>
+
+                    <button
+                        className="quick-action-btn"
+                        onClick={() => navigate('/admin/integrations')}
+                    >
+                        <span className="action-icon">🔌</span>
+                        <span className="action-text">Zarządzaj integracjami</span>
+                    </button>
+
+                    <button
+                        className="quick-action-btn"
+                        onClick={() => navigate('/admin/stats')}
+                    >
+                        <span className="action-icon">📊</span>
+                        <span className="action-text">Zobacz statystyki</span>
+                    </button>
+
+                    <button
+                        className="quick-action-btn"
+                        onClick={() => navigate('/admin/pages')}
+                    >
+                        <span className="action-icon">📄</span>
+                        <span className="action-text">Lista wszystkich stron</span>
+                    </button>
+                </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', marginTop: '30px' }}>
+
+
+                {/* Status systemowy */}
+                <div className="info-section">
+                    <h3>⚙️ Status Systemu</h3>
+                    <ul className="feature-list">
+                        <li>Backend: Połączono</li>
+                        <li>Baza danych: Aktywna</li>
+                        <li>Integracje: {stats.activeIntegrations}/{stats.activeIntegrations} działających</li>
+                        <li>Ostatnia aktualizacja: {new Date().toLocaleString('pl-PL')}</li>
+                    </ul>
+
+                    <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#0a0a2e', border: '1px solid #00aa00' }}>
+                        <p style={{ fontSize: '12px', textAlign: 'center', color: '#00aa00' }}>
+                            ✅ System działa prawidłowo
+                        </p>
+                    </div>
+                </div>
+
             </div>
 
             {/* Footer */}
-            <div className="footer">
-                <p>TELEGAZETA © 2025 | SYSTEM ZARZĄDZANIA</p>
-                <p>SESJA ADMINA: AKTYWNA</p>
+            <div className="ascii-art" style={{ textAlign: 'center', margin: '30px 0', fontSize: '10px' }}>
+                {`╔═════════════════════════════════════════╗
+║   TELEGAZETA © 2026                     ║
+║   System Zarządzania Treścią            ║
+╚═════════════════════════════════════════╝`}
             </div>
         </AdminLayout>
     );
