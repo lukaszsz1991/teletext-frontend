@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/layout/AdminLayout';
 import '../styles/teletext.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function AdminIntegrations() {
     const navigate = useNavigate();
     const [templates, setTemplates] = useState([]);
@@ -31,7 +33,7 @@ function AdminIntegrations() {
 
         try {
             const token = localStorage.getItem('jwt_token');
-            const response = await fetch('http://localhost:8080/api/admin/templates', {
+            const response = await fetch(`${API_BASE_URL}/admin/templates`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -56,7 +58,7 @@ function AdminIntegrations() {
 
         try {
             const token = localStorage.getItem('jwt_token');
-            const response = await fetch(`http://localhost:8080/api/admin/templates/${templateId}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/templates/${templateId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -78,8 +80,8 @@ function AdminIntegrations() {
         try {
             const token = localStorage.getItem('jwt_token');
             const endpoint = currentStatus ?
-                `http://localhost:8080/api/admin/templates/${templateId}` :
-                `http://localhost:8080/api/admin/templates/${templateId}/activate`;
+                `${API_BASE_URL}/admin/templates/${templateId}` :
+                `${API_BASE_URL}/admin/templates/${templateId}/activate`;
 
             const method = currentStatus ? 'DELETE' : 'PATCH';
 

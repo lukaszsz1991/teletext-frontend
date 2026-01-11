@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/layout/AdminLayout.jsx';
 import '../styles/teletext.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function AdminDashboard() {
     const navigate = useNavigate();
     const [stats, setStats] = useState({
@@ -30,20 +32,20 @@ function AdminDashboard() {
             const token = localStorage.getItem('jwt_token');
 
             // Pobierz strony
-            const pagesResponse = await fetch('http://localhost:8080/api/admin/pages', {
+            const pagesResponse = await fetch(`${API_BASE_URL}/admin/pages`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const pages = await pagesResponse.json();
 
             // Pobierz statystyki
-            const statsResponse = await fetch('http://localhost:8080/api/admin/stats/pages?size=100', {
+            const statsResponse = await fetch(`${API_BASE_URL}/admin/stats/pages?size=100`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const statsData = await statsResponse.json();
             const totalViews = statsData.reduce((sum, page) => sum + page.views, 0);
 
             // Pobierz templates
-            const templatesResponse = await fetch('http://localhost:8080/api/admin/templates', {
+            const templatesResponse = await fetch(`${API_BASE_URL}/admin/templates`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const templates = await templatesResponse.json();
