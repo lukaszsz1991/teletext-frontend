@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Scanlines from '../../components/layout/Scanlines';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
@@ -9,6 +9,7 @@ const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/ap
 
 function MatchesPage() {
     const navigate = useNavigate();
+    const { pageNumber } = useParams();
     const [matchesData, setMatchesData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -18,7 +19,7 @@ function MatchesPage() {
         setError(null);
 
         try {
-            const response = await fetch(`${API_BASE_URL}/public/pages/202`);
+            const response = await fetch(`${API_BASE_URL}/public/pages/${pageNumber}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -45,34 +46,34 @@ function MatchesPage() {
 
     useEffect(() => {
         fetchMatchesData();
-        // Odświeżaj co 2 minuty (mecze mogą być live)
         const interval = setInterval(fetchMatchesData, 2 * 60 * 1000);
         return () => clearInterval(interval);
-    }, []);
+    }, [pageNumber]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return date.toLocaleString('pl-PL', {
-            weekday: 'short',
-            day: '2-digit',
-            month: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        const days = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
+        const dayName = days[date.getDay()];
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+
+        return `${dayName}, ${day}.${month}, ${hours}:${minutes}`;
     };
 
-    const getMatchStatusColor = (state) => {
-        if (!state) return '#00aa00';
-        if (state.description === 'Finished') return '#00aa00';
-        if (state.description === 'Live' || state.clock > 0) return '#ffff00';
-        return '#00aaaa'; // Scheduled
+    const getMatchStatusClass = (state) => {
+        if (!state) return 'match-upcoming';
+        if (state.description === 'Finished') return 'match-finished';
+        if (state.clock > 0) return 'match-live';
+        return 'match-upcoming';
     };
 
     const getMatchStatusText = (state) => {
-        if (!state) return 'Zaplanowany';
-        if (state.description === 'Finished') return 'Zakończony';
-        if (state.clock && state.clock > 0) return `${state.clock}'`;
-        return state.description || 'Zaplanowany';
+        if (!state) return 'Nie rozpoczęty';
+        if (state.description === 'Finished') return 'ZAKOŃCZONY';
+        if (state.clock > 0) return `${state.clock}'`;
+        return 'Nie rozpoczęty';
     };
 
     if (loading) {
@@ -82,7 +83,7 @@ function MatchesPage() {
                 <div className="container">
                     <Header />
                     <div className="info-section" style={{ textAlign: 'center' }}>
-                        <p>Pobieranie meczów...</p>
+                        <p>Pobieranie danych meczów...</p>
                     </div>
                     <Footer />
                 </div>
@@ -117,7 +118,7 @@ function MatchesPage() {
 
                 <div className="info-section">
                     <h2 style={{ fontSize: '32px', marginBottom: '10px' }}>
-                        {matchesData.pageNumber} - {matchesData.title}
+                        {matchesData.pageNumber} - Ekstraklasa - sezon 2025
                     </h2>
                     <p style={{ fontSize: '12px', color: '#00aa00' }}>
                         Kategoria: SPORTS | Dane z Backend API
@@ -125,53 +126,105 @@ function MatchesPage() {
                 </div>
 
                 <div className="ascii-art" style={{ textAlign: 'center', margin: '20px 0', fontSize: '14px' }}>
-                    {`╔═══════════════════════════════════╗
-║       MECZE EKSTRAKLASY           ║
-╚═══════════════════════════════════╝`}
+                    {`╔══════════════════════════════════╗
+║      MECZE EKSTRAKLASY           ║
+╚══════════════════════════════════╝`}
                 </div>
 
                 {matchesData && (
                     <div className="info-section">
-                        <div className="sports-info">
-                            <p>{matchesData.description}</p>
+                        <div style={{
+                            textAlign: 'center',
+                            padding: '15px',
+                            border: '2px solid #00ff00',
+                            backgroundColor: '#0a3d0a',
+                            marginBottom: '30px'
+                        }}>
+                            <h3 style={{ fontSize: '20px', color: '#00ff00', marginBottom: '5px' }}>
+                                {matchesData.description}
+                            </h3>
                         </div>
 
-                        <div className="matches-list">
-                            {matchesData.matches.map((match, index) => (
-                                <div key={index} className="match-card">
-                                    <div className="match-header">
-                                        <span className="match-round">{match.round}</span>
-                                        <span className="match-date">{formatDate(match.date)}</span>
-                                    </div>
+                        <div style={{ display: 'grid', gap: '20px' }}>
+                            {matchesData.matches.map((match, index) => {
+                                const statusClass = getMatchStatusClass(match.state);
+                                const isFinished = match.state?.description === 'Finished';
 
-                                    <div className="match-teams">
-                                        <div className="team home-team">
-                                            <span className="team-name">{match.homeTeam}</span>
-                                        </div>
-
-                                        <div className="match-score">
-                                            {match.state && match.state.currentScore ? (
-                                                <span className="score">{match.state.currentScore}</span>
-                                            ) : (
-                                                <span className="vs">VS</span>
-                                            )}
-                                        </div>
-
-                                        <div className="team away-team">
-                                            <span className="team-name">{match.awayTeam}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="match-footer">
-                                        <span
-                                            className="match-status"
-                                            style={{ color: getMatchStatusColor(match.state) }}
-                                        >
+                                return (
+                                    <div
+                                        key={index}
+                                        style={{
+                                            padding: '20px',
+                                            border: `2px solid ${isFinished ? '#00ff00' : '#00aa00'}`,
+                                            backgroundColor: isFinished ? '#0a3d0a' : '#0a0a0a',
+                                            position: 'relative'
+                                        }}
+                                    >
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '10px',
+                                            right: '10px',
+                                            padding: '5px 10px',
+                                            backgroundColor: isFinished ? '#00ff00' : '#ffaa00',
+                                            color: '#000',
+                                            fontSize: '11px',
+                                            fontWeight: 'bold',
+                                            borderRadius: '3px'
+                                        }}>
                                             {getMatchStatusText(match.state)}
-                                        </span>
+                                        </div>
+
+                                        <div style={{ marginBottom: '15px' }}>
+                                            <div style={{ fontSize: '12px', color: '#00aa00', marginBottom: '5px' }}>
+                                                {match.round}
+                                            </div>
+                                            <div style={{ fontSize: '12px', color: '#00aa00' }}>
+                                                📅 {formatDate(match.date)}
+                                            </div>
+                                        </div>
+
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: '2fr 1fr 2fr',
+                                            alignItems: 'center',
+                                            gap: '20px',
+                                            marginTop: '15px'
+                                        }}>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#00ff00' }}>
+                                                    {match.homeTeam}
+                                                </div>
+                                            </div>
+
+                                            <div style={{
+                                                textAlign: 'center',
+                                                fontSize: '32px',
+                                                fontWeight: 'bold',
+                                                color: isFinished ? '#ffff00' : '#00ff00'
+                                            }}>
+                                                {match.state?.currentScore || '-'}
+                                            </div>
+
+                                            <div style={{ textAlign: 'left' }}>
+                                                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#00ff00' }}>
+                                                    {match.awayTeam}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {match.state?.penaltiesScore && (
+                                            <div style={{
+                                                marginTop: '10px',
+                                                textAlign: 'center',
+                                                fontSize: '14px',
+                                                color: '#ffaa00'
+                                            }}>
+                                                Karne: {match.state.penaltiesScore}
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         <div style={{
@@ -185,7 +238,7 @@ function MatchesPage() {
                                 📡 Dane pobrane z Backend API (Spring Boot)
                             </p>
                             <p style={{ fontSize: '12px', color: '#00aa00', marginTop: '5px' }}>
-                                ⚽ Źródło: {matchesData.source} | Ostatnia aktualizacja: {new Date(matchesData.updatedAt).toLocaleString('pl-PL')}
+                                ⚽ Źródło: Highlightly API | Ostatnia aktualizacja: {new Date(matchesData.updatedAt).toLocaleString('pl-PL')}
                             </p>
                         </div>
                     </div>
@@ -196,10 +249,7 @@ function MatchesPage() {
                         ← Powrót do listy
                     </button>
                     <button className="btn" onClick={fetchMatchesData}>
-                        🔄 Odśwież wyniki
-                    </button>
-                    <button className="btn" onClick={() => navigate('/pages/201')}>
-                        📊 Tabela ligowa
+                        🔄 Odśwież dane
                     </button>
                 </div>
 

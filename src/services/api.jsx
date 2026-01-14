@@ -85,7 +85,6 @@ export const clearSession = () => {
 };
 
 // CATEGORIES
-
 export const getCategories = async () => {
     try {
         const response = await apiClient.get('/public/categories');
@@ -97,18 +96,37 @@ export const getCategories = async () => {
 
 export const getPublicPages = async () => {
     try {
-        const categories = ['NEWS', 'SPORTS', 'LOTTERY', 'TV', 'WEATHER', 'JOBS', 'HOROSCOPE', 'FINANCE', 'MISC'];
+        const categories = [
+            'NEWS',
+            'SPORTS',
+            'LOTTERY',
+            'TV',
+            'WEATHER',
+            'JOBS',
+            'HOROSCOPE',
+            'FINANCE',
+            'MISC'
+        ];
 
-        const promises = categories.map(cat =>
-            apiClient.get('/public/pages', { params: { category: cat } })
-                .catch(() => ({ data: [] })) // Ignoruj błędy
-        );
+        const allPages = [];
 
-        const results = await Promise.all(promises);
-        const allPages = results.flatMap(r => r.data || []);
+        for (const category of categories) {
+            try {
+                const response = await apiClient.get('/public/pages', {
+                    params: { category }
+                });
+
+                if (response.data && Array.isArray(response.data)) {
+                    allPages.push(...response.data);
+                }
+            } catch (error) {
+                console.log(`No pages found for category: ${category}`);
+            }
+        }
 
         return allPages;
     } catch (error) {
+        console.error('Error in getPublicPages:', error);
         throw error;
     }
 };
@@ -121,8 +139,6 @@ export const getPageByNumber = async (pageNumber) => {
         throw error;
     }
 };
-
-// PAGES - ADMIN (wymaga tokena JWT)
 
 export const getAllPages = async (includeInactive = false) => {
     try {
@@ -174,7 +190,6 @@ export const deletePage = async (pageId) => {
 };
 
 // UTILITY
-
 export const getNextAvailablePageNumber = async () => {
     try {
         const allPages = await getAllPages(false);
