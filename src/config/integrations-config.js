@@ -4,6 +4,7 @@ import MatchesPage from '../pages/integrations/Matchespage';
 import LotteryPage from '../pages/integrations/Lotterypage';
 import WeatherPage from '../pages/integrations/WeatherPage';
 import CurrencyPage from '../pages/integrations/CurrencyPage';
+import JobsPage from '../pages/integrations/JobsPage';
 
 export const INTEGRATIONS_CONFIG = {
     201: {
@@ -44,7 +45,7 @@ export const INTEGRATIONS_CONFIG = {
         name: 'Wyniki Lotto',
         icon: '🎰',
         description: 'Ostatnie losowanie',
-        status: 'soon'
+        status: 'active'
     },
     501: {
         category: 'WEATHER',
@@ -53,6 +54,14 @@ export const INTEGRATIONS_CONFIG = {
         icon: '🌤️',
         description: 'Prognoza 7-dniowa',
         status: 'active'
+    },
+    601: {
+        category: 'JOBS',
+        component: JobsPage,
+        name: 'Oferty Pracy',
+        icon: '💼',
+        description: 'Najnowsze oferty',
+        status: 'soon'
     },
     801: {
         category: 'FINANCE',

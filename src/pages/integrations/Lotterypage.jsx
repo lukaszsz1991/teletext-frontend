@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Scanlines from '../../components/layout/Scanlines';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
@@ -9,6 +9,7 @@ const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/ap
 
 function LotteryPage() {
     const navigate = useNavigate();
+    const { pageNumber } = useParams();
     const [lotteryData, setLotteryData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -18,7 +19,7 @@ function LotteryPage() {
         setError(null);
 
         try {
-            const response = await fetch(`${API_BASE_URL}/public/pages/302`);
+            const response = await fetch(`${API_BASE_URL}/public/pages/${pageNumber}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -27,6 +28,7 @@ function LotteryPage() {
             const data = await response.json();
 
             setLotteryData({
+                pageNumber: data.pageNumber,
                 gameType: data.content.additionalData.gameType,
                 lastDrawResults: data.content.additionalData.lastDrawResults,
                 lastDrawDate: data.content.additionalData.lastDrawDate,
@@ -46,7 +48,7 @@ function LotteryPage() {
 
     useEffect(() => {
         fetchLottery();
-    }, []);
+    }, [pageNumber]);
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
@@ -112,7 +114,7 @@ function LotteryPage() {
 
                 <div className="info-section">
                     <h2 style={{ fontSize: '32px', marginBottom: '10px' }}>
-                        302 - Wyniki Lotto
+                        {lotteryData.pageNumber} - Wyniki Lotto
                     </h2>
                     <p style={{ fontSize: '12px', color: '#00aa00' }}>
                         Kategoria: LOTTERY | Dane z Backend API
