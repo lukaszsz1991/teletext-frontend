@@ -1368,3 +1368,255 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+.categories-browser {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.category-section {
+    background: rgba(0, 50, 0, 0.3);
+    border: 2px solid #00ff00;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.category-section:hover {
+    border-color: #00ffff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    cursor: pointer;
+    background: rgba(0, 50, 0, 0.5);
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.category-header:hover {
+    background: rgba(0, 100, 0, 0.7);
+}
+
+.category-header.expanded {
+    background: rgba(0, 100, 0, 0.8);
+    border-bottom: 2px solid #00ff00;
+}
+
+.category-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.category-number {
+    font-size: 0.85em;
+    color: #00ffff;
+    font-weight: bold;
+    text-shadow: 0 0 5px #00ffff;
+}
+
+.category-name {
+    font-size: 1.2em;
+    color: #00ff00;
+    font-weight: bold;
+    text-shadow: 0 0 8px #00ff00;
+}
+
+.category-description {
+    font-size: 0.9em;
+    color: #88ff88;
+    font-style: italic;
+}
+
+.category-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-count {
+    font-size: 0.9em;
+    color: #00ffff;
+    font-weight: bold;
+}
+
+.expand-icon {
+    font-size: 1.2em;
+    color: #00ff00;
+    transition: transform 0.3s ease;
+}
+
+.category-header.expanded .expand-icon {
+    transform: rotate(0deg);
+}
+
+.category-pages {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        padding: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 1000px;
+        padding: 8px;
+    }
+}
+
+.category-page-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    margin: 4px 0;
+    background: rgba(0, 50, 0, 0.3);
+    border: 1px solid #00ff00;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.category-page-item:hover {
+    background: rgba(0, 100, 0, 0.6);
+    border-color: #00ffff;
+    transform: translateX(5px);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.category-page-item .page-number {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #00ffff;
+    min-width: 50px;
+    text-shadow: 0 0 5px #00ffff;
+}
+
+.category-page-item .page-title {
+    font-size: 1em;
+    color: #00ff00;
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .category-header {
+        padding: 12px 16px;
+    }
+
+    .category-info {
+        gap: 2px;
+    }
+
+    .category-name {
+        font-size: 1em;
+    }
+
+    .category-description {
+        font-size: 0.8em;
+    }
+
+    .category-number {
+        font-size: 0.75em;
+    }
+
+    .category-page-item {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .category-page-item .page-number {
+        min-width: 40px;
+        font-size: 1em;
+    }
+
+    .category-page-item .page-title {
+        font-size: 0.9em;
+    }
+
+    .category-meta {
+        gap: 8px;
+    }
+
+    .page-count {
+        font-size: 0.8em;
+    }
+}
+
+@media (max-width: 480px) {
+    .category-header {
+        padding: 10px 12px;
+    }
+
+    .category-info {
+        flex: 1;
+    }
+
+    .category-name {
+        font-size: 0.95em;
+    }
+
+    .category-description {
+        font-size: 0.75em;
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .category-page-item {
+        padding: 8px 10px;
+    }
+
+    .category-page-item .page-number {
+        min-width: 35px;
+        font-size: 0.95em;
+    }
+
+    .category-page-item .page-title {
+        font-size: 0.85em;
+    }
+}
+
+.categories-browser {
+    background-image:
+            repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 255, 0, 0.05) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(0, 255, 0, 0.05) 3px
+            );
+}
+
+.category-header,
+.category-page-item {
+    animation: none;
+}
+
+.category-header:hover,
+.category-page-item:hover {
+    animation: subtleFlicker 0.1s infinite alternate;
+}
+
+@keyframes subtleFlicker {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.98;
+    }
+}

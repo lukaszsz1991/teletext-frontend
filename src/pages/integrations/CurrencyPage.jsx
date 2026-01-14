@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Scanlines from '../../components/layout/Scanlines';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
@@ -9,6 +9,7 @@ const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/ap
 
 function CurrencyPage() {
     const navigate = useNavigate();
+    const { pageNumber } = useParams();
     const [currencyData, setCurrencyData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -18,7 +19,7 @@ function CurrencyPage() {
         setError(null);
 
         try {
-            const response = await fetch(`${API_BASE_URL}/public/pages/801`);
+            const response = await fetch(`${API_BASE_URL}/public/pages/${pageNumber}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -27,9 +28,10 @@ function CurrencyPage() {
             const data = await response.json();
 
             const rates = data.content.additionalData.rates;
-            const latestRate = rates[rates.length - 1]; // Ostatni kurs (najnowszy)
+            const latestRate = rates[rates.length - 1];
 
             setCurrencyData({
+                pageNumber: data.pageNumber,
                 code: data.content.additionalData.code,
                 currency: data.content.additionalData.currency,
                 latestRate: latestRate,
@@ -46,7 +48,7 @@ function CurrencyPage() {
 
     useEffect(() => {
         fetchCurrencies();
-    }, []);
+    }, [pageNumber]);
 
     if (loading) {
         return (
@@ -90,7 +92,7 @@ function CurrencyPage() {
 
                 <div className="info-section">
                     <h2 style={{ fontSize: '32px', marginBottom: '10px' }}>
-                        801 - Kursy Walut
+                        {currencyData.pageNumber} - Kursy Walut
                     </h2>
                     <p style={{ fontSize: '12px', color: '#00aa00' }}>
                         Kategoria: FINANCE | Dane z Backend API

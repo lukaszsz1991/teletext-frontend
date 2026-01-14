@@ -15,6 +15,8 @@ import JobsPage from "./pages/integrations/JobsPage.jsx";
 import LotteryPage from "./pages/integrations/Lotterypage.jsx";
 import SportsPage from "./pages/integrations/SportsPage.jsx";
 import MatchesPage from "./pages/integrations/Matchespage.jsx";
+import CategoryBrowserPage from './pages/CategoryBrowserPage';
+import DynamicPageView from './pages/DynamicPageView';
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -22,15 +24,8 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/pages" element={<PageListPage />} />
-                <Route path="/pages/102" element={<NewsPage />} />
-                <Route path="/pages/201" element={<SportsPage />} />
-                <Route path="/pages/202" element={<MatchesPage />} />
-                <Route path="/pages/302" element={<LotteryPage />} />
-                <Route path="/pages/502" element={<WeatherPage />} />
-                <Route path="/pages/600" element={<JobsPage />} />
-                <Route path="/pages/801" element={<CurrencyPage />} />
-                <Route path="/pages/:pageNumber" element={<PageViewPage />} />
+                <Route path="/pages" element={<CategoryBrowserPage />} />
+                <Route path="/pages/:pageNumber" element={<DynamicPageView />} />
 
                 <Route path="/admin/login" element={<AdminLogin />} />
 

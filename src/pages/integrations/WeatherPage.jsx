@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Scanlines from '../../components/layout/Scanlines';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
@@ -9,6 +9,7 @@ const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/ap
 
 function WeatherPage() {
     const navigate = useNavigate();
+    const { pageNumber } = useParams();
     const [weatherData, setWeatherData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -19,7 +20,7 @@ function WeatherPage() {
         setError(null);
 
         try {
-            const response = await fetch(`${API_BASE_URL}/public/pages/502`);
+            const response = await fetch(`${API_BASE_URL}/public/pages/${pageNumber}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -46,7 +47,7 @@ function WeatherPage() {
 
     useEffect(() => {
         fetchWeather();
-    }, []);
+    }, [pageNumber]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -99,7 +100,7 @@ function WeatherPage() {
 
                 <div className="info-section">
                     <h2 style={{ fontSize: '32px', marginBottom: '10px' }}>
-                        502 - Prognoza Pogody
+                        {pageNumber} - Prognoza Pogody
                     </h2>
                     <p style={{ fontSize: '12px', color: '#00aa00' }}>
                         Kategoria: WEATHER | {cityName} | Dane z Backend API
@@ -172,7 +173,7 @@ function WeatherPage() {
                             📡 Dane pobrane z Backend API (Spring Boot)
                         </p>
                         <p style={{ fontSize: '12px', color: '#00aa00' }}>
-                            🌐 Źródło: OpenMeteo API | Ostatnia aktualizacja: {new Date().toLocaleString('pl-PL')}
+                            🌍 Źródło: OpenMeteo API | Ostatnia aktualizacja: {new Date().toLocaleString('pl-PL')}
                         </p>
                     </div>
                 </div>
