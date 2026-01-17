@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Scanlines from '../../components/layout/Scanlines';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
@@ -9,30 +9,23 @@ const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/ap
 
 function NewsPage() {
     const navigate = useNavigate();
+    const { pageNumber } = useParams();
     const [news, setNews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [pageTitle, setPageTitle] = useState('');
 
     const fetchNews = async () => {
         setLoading(true);
         setError(null);
 
         try {
-            // Pobierz dane z backendu zamiast bezpośrednio z NewsData API
-            const response = await fetch(`${API_BASE_URL}/public/pages/102`);
+            const response = await fetch(`${API_BASE_URL}/public/pages/${pageNumber}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
-
-            // Wyciągnij tytuł strony
-            setPageTitle(data.content.title);
-
-            // Backend zwraca jeden artykuł w content
-            // Przekształć do formatu tablicy dla kompatybilności z istniejącym UI
             const article = {
                 title: data.content.title,
                 description: data.content.description,
@@ -43,7 +36,7 @@ function NewsPage() {
                 keywords: data.content.additionalData.keywords
             };
 
-            setNews([article]); // Jeden artykuł jako tablica
+            setNews([article]);
             setLoading(false);
         } catch (error) {
             console.error('Błąd podczas pobierania wiadomości:', error);
@@ -54,7 +47,7 @@ function NewsPage() {
 
     useEffect(() => {
         fetchNews();
-    }, []);
+    }, [pageNumber]);
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
@@ -108,24 +101,21 @@ function NewsPage() {
             <div className="container">
                 <Header />
 
-                {/* Nagłówek strony */}
                 <div className="info-section">
                     <h2 style={{ fontSize: '32px', marginBottom: '10px' }}>
-                        102 - Najnowsze Wiadomości
+                        {pageNumber} - Najnowsze Wiadomości
                     </h2>
                     <p style={{ fontSize: '12px', color: '#00aa00' }}>
                         Kategoria: NEWS | Dane z Backend API
                     </p>
                 </div>
 
-                {/* ASCII Art */}
                 <div className="ascii-art" style={{ textAlign: 'center', margin: '20px 0', fontSize: '14px' }}>
                     {`╔══════════════════════════════════╗
 ║      WIADOMOŚCI Z POLSKI          ║
 ╚══════════════════════════════════╝`}
                 </div>
 
-                {/* Lista wiadomości */}
                 <div className="info-section">
                     {news.map((article, index) => (
                         <div
@@ -218,7 +208,6 @@ function NewsPage() {
                     </div>
                 </div>
 
-                {/* Przyciski nawigacji */}
                 <div className="button-group" style={{ marginTop: '30px' }}>
                     <button className="btn" onClick={() => navigate('/pages')}>
                         ← Powrót do listy
