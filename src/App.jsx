@@ -27,6 +27,8 @@ function App() {
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/pages" element={<CategoryBrowserPage />} />
+
+                {/* Jeden routing dla WSZYSTKICH stron - DynamicPageView sam decyduje */}
                 <Route path="/pages/:pageNumber" element={<DynamicPageView />} />
 
                 <Route path="/admin/login" element={<AdminLogin />} />

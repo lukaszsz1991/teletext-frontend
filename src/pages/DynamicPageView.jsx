@@ -1,10 +1,48 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getIntegration } from '../config/integrations-config';
+import ManualPageWrapper from './ManualPageWrapper';
+
+const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 const DynamicPageView = () => {
     const { pageNumber } = useParams();
     const navigate = useNavigate();
+    const [pageType, setPageType] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const checkPageType = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/public/pages/${pageNumber}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('📦 Typ strony:', data.type);
+                    setPageType(data.type);
+                }
+            } catch (err) {
+                console.error('Błąd sprawdzania typu:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkPageType();
+    }, [pageNumber]);
+
+    // Jeśli loading - pokaż placeholder
+    if (loading) {
+        return <div>Ładowanie...</div>;
+    }
+
+    // Jeśli typ MANUAL - użyj ManualPageWrapper
+    if (pageType === 'MANUAL') {
+        console.log('✅ Renderuję ManualPageWrapper');
+        return <ManualPageWrapper />;
+    }
+
+    // W przeciwnym razie - użyj starego systemu z integrations-config
+    console.log('✅ Renderuję przez integrations-config');
     const integration = getIntegration(pageNumber);
 
     if (!integration) {
@@ -12,7 +50,7 @@ const DynamicPageView = () => {
             <div className="teletext-page">
                 <div className="page-header">
                     <h1 className="page-title" style={{ color: '#ff0000' }}>
-                        ❌ Strona {pageNumber} nie istnieje
+                        ✖ Strona {pageNumber} nie istnieje
                     </h1>
                 </div>
                 <div className="page-content">
