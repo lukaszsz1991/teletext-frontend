@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import AdminLayout from '../components/layout/AdminLayout';
-import { createPage } from '../services/api';
-import '../styles/teletext.css';
+import AdminLayout from '../../components/layout/AdminLayout.jsx';
+import { createPage } from '../../services/api.jsx';
+import '../../styles/teletext.css';
 
 function AdminPageNew() {
     const { id } = useParams();

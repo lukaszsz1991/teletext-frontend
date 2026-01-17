@@ -1,12 +1,14 @@
 import HomePage from "./pages/HomePage.jsx";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import PageListPage from "./pages/PageListPage.jsx";
-import AdminLogin from "./pages/AdminLogin.jsx";
-import AdminDashboard from "./pages/AdminDashboard.jsx";
-import AdminPages from "./pages/AdminPages.jsx";
-import AdminPageNew from "./pages/AdminPageNew.jsx";
-import AdminIntegrations from "./pages/AdminIntegrations.jsx";
-import AdminStats from "./pages/AdminStats.jsx";
+import AdminLogin from "./pages/admin/AdminLogin.jsx";
+import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
+import AdminPages from "./pages/admin/AdminPages.jsx";
+import AdminPageNew from "./pages/admin/AdminPageNew.jsx";
+import AdminIntegrations from "./pages/admin/AdminIntegrations.jsx";
+import AdminStats from "./pages/admin/AdminStats.jsx";
+import TemplateDetailPage from "./pages/admin/TemplateDetailPage.jsx";
+import TemplateEditPage from "./pages/admin/TemplateEditPage.jsx";
 import PageViewPage from "./pages/PageViewPage.jsx";
 import WeatherPage from "./pages/integrations/WeatherPage.jsx";
 import CurrencyPage from "./pages/integrations/CurrencyPage.jsx";
@@ -66,6 +68,22 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <AdminIntegrations />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/templates/:id"
+                    element={
+                        <ProtectedRoute>
+                            <TemplateDetailPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/templates/edit/:id"
+                    element={
+                        <ProtectedRoute>
+                            <TemplateEditPage />
                         </ProtectedRoute>
                     }
                 />

@@ -7,7 +7,6 @@ import { isAuthenticated } from '../services/api.jsx';
  */
 function ProtectedRoute({ children }) {
     if (!isAuthenticated()) {
-        // Użytkownik nie jest zalogowany, przekierowanie strony do logowania
         return <Navigate to="/admin/login" replace />;
     }
 

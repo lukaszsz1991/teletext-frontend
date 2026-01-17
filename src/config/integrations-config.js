@@ -83,7 +83,7 @@ export const INTEGRATIONS_CONFIG = {
 
 export const getCategoryIntegrations = (categoryName) => {
     return Object.entries(INTEGRATIONS_CONFIG)
-        .filter(([_, integration]) => integration.category === categoryName)
+        .filter(([, integration]) => integration.category === categoryName)
         .map(([pageNumber, integration]) => ({
             pageNumber: parseInt(pageNumber),
             ...integration
@@ -96,7 +96,7 @@ export const getIntegration = (pageNumber) => {
 
 export const getAllActiveIntegrations = () => {
     return Object.entries(INTEGRATIONS_CONFIG)
-        .filter(([_, integration]) => integration.status === 'active')
+        .filter(([, integration]) => integration.status === 'active')
         .map(([pageNumber, integration]) => ({
             pageNumber: parseInt(pageNumber),
             ...integration

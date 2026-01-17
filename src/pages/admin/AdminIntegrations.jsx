@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AdminLayout from '../components/layout/AdminLayout';
-import '../styles/teletext.css';
+import AdminLayout from '../../components/layout/AdminLayout.jsx';
+import '../../styles/teletext.css';
 
 const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/api';
 
@@ -70,32 +70,6 @@ function AdminIntegrations() {
                 fetchTemplates();
             } else {
                 alert('Błąd podczas usuwania template');
-            }
-        } catch (err) {
-            alert('Błąd: ' + err.message);
-        }
-    };
-
-    const handleToggleActive = async (templateId, currentStatus) => {
-        try {
-            const token = localStorage.getItem('jwt_token');
-            const endpoint = currentStatus ?
-                `${API_BASE_URL}/admin/templates/${templateId}` :
-                `${API_BASE_URL}/admin/templates/${templateId}/activate`;
-
-            const method = currentStatus ? 'DELETE' : 'PATCH';
-
-            const response = await fetch(endpoint, {
-                method: method,
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                fetchTemplates();
-            } else {
-                alert('Błąd podczas zmiany statusu');
             }
         } catch (err) {
             alert('Błąd: ' + err.message);
@@ -214,17 +188,6 @@ function AdminIntegrations() {
                                                 title="Edytuj"
                                             >
                                                 ✏️
-                                            </button>
-                                            <button
-                                                className="btn btn-small"
-                                                onClick={() => handleToggleActive(template.id, template.active)}
-                                                title={template.active ? "Deaktywuj" : "Aktywuj"}
-                                                style={{
-                                                    borderColor: template.active ? '#ffaa00' : '#00ff00',
-                                                    color: template.active ? '#ffaa00' : '#00ff00'
-                                                }}
-                                            >
-                                                {template.active !== false ? '🔄' : '✅'}
                                             </button>
                                             <button
                                                 className="btn btn-small btn-delete"

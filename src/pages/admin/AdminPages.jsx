@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import AdminLayout from '../components/layout/AdminLayout';
-import PagesList from '../components/PagesList';
-import '../styles/teletext.css';
+import AdminLayout from '../../components/layout/AdminLayout.jsx';
+import PagesList from '../../components/PagesList.jsx';
+import '../../styles/teletext.css';
 
 function AdminPages() {
     const navigate = useNavigate();

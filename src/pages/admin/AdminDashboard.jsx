@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AdminLayout from '../components/layout/AdminLayout.jsx';
-import '../styles/teletext.css';
+import AdminLayout from '../../components/layout/AdminLayout.jsx';
+import '../../styles/teletext.css';
 
 const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/api';
 
@@ -16,7 +16,6 @@ function AdminDashboard() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Sprawdź czy użytkownik jest zalogowany
         const token = localStorage.getItem('jwt_token');
         if (!token) {
             navigate('/admin/login');
@@ -31,25 +30,21 @@ function AdminDashboard() {
         try {
             const token = localStorage.getItem('jwt_token');
 
-            // Pobierz strony
             const pagesResponse = await fetch(`${API_BASE_URL}/admin/pages`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const pages = await pagesResponse.json();
 
-            // Pobierz statystyki
             const statsResponse = await fetch(`${API_BASE_URL}/admin/stats/pages?size=100`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const statsData = await statsResponse.json();
             const totalViews = statsData.reduce((sum, page) => sum + page.views, 0);
 
-            // Pobierz templates
             const templatesResponse = await fetch(`${API_BASE_URL}/admin/templates`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const templates = await templatesResponse.json();
-            const activeTemplates = templates.filter(t => t.active !== false).length;
 
             // Grupuj po source żeby policzyć integracje
             const uniqueSources = [...new Set(templates.map(t => t.source))];
@@ -102,7 +97,6 @@ function AdminDashboard() {
                 </div>
             </div>
 
-            {/* Quick Actions */}
             <div className="info-section" style={{ marginTop: '30px' }}>
                 <h3>🚀 Szybkie Akcje</h3>
                 <div className="quick-actions">
@@ -142,8 +136,6 @@ function AdminDashboard() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', marginTop: '30px' }}>
 
-
-                {/* Status systemowy */}
                 <div className="info-section">
                     <h3>⚙️ Status Systemu</h3>
                     <ul className="feature-list">
