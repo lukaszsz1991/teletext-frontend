@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../services/api';
-import { INTEGRATIONS_CONFIG, getCategoryIntegrations } from '../config/integrations-config';
 
 const CategoryBrowserPage = () => {
     const [categories, setCategories] = useState([]);
@@ -10,61 +9,49 @@ const CategoryBrowserPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchCategories();
+        fetchCategoriesWithPages();
     }, []);
 
-    const fetchCategories = async () => {
+    const fetchCategoriesWithPages = async () => {
         setLoading(true);
         setError(null);
 
         try {
+            // Pobierz kategorie
             const categoriesResponse = await apiClient.get('/public/categories');
             const fetchedCategories = categoriesResponse.data || [];
 
-            const categoriesWithIntegrations = fetchedCategories.map(category => {
-                const integrations = getCategoryIntegrations(category.originalName);
-                return {
-                    ...category,
-                    integrations,
-                    hasIntegrations: integrations.length > 0
-                };
-            }).filter(cat => cat.hasIntegrations);
+            console.log('📦 Kategorie:', fetchedCategories.length);
 
-            setCategories(categoriesWithIntegrations);
+            // Dla każdej kategorii pobierz strony
+            const categoriesWithPages = await Promise.all(
+                fetchedCategories.map(async (category) => {
+                    const pagesResponse = await apiClient.get('/public/pages', {
+                        params: { category: category.originalName }
+                    });
+
+                    const pages = pagesResponse.data || [];
+                    console.log(`📄 ${category.originalName}: ${pages.length} stron`);
+
+                    return { ...category, pages, hasPages: pages.length > 0 };
+                })
+            );
+
+            // Filtruj kategorie ze stronami
+            const withContent = categoriesWithPages.filter(cat => cat.hasPages);
+
+            console.log('✅ Wyświetlam kategorii:', withContent.length);
+            setCategories(withContent);
         } catch (err) {
-            console.error('Error fetching categories:', err);
-            setError('Nie udało się pobrać kategorii.');
+            console.error('❌ Błąd:', err);
+            setError('Nie udało się pobrać danych.');
         } finally {
             setLoading(false);
         }
     };
 
-    const navigateToPage = (pageNumber) => {
-        navigate(`/pages/${pageNumber}`);
-    };
-
-    if (loading) {
-        return (
-            <div className="teletext-page">
-                <div className="page-header">
-                    <h1 className="page-title">Ładowanie kategorii...</h1>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="teletext-page">
-                <div className="page-header">
-                    <h1 className="page-title">Błąd</h1>
-                </div>
-                <div className="page-content">
-                    <p className="error-message">{error}</p>
-                </div>
-            </div>
-        );
-    }
+    if (loading) return <div className="teletext-page"><h1 className="page-title">Ładowanie...</h1></div>;
+    if (error) return <div className="teletext-page"><h1 className="page-title">{error}</h1></div>;
 
     return (
         <div className="teletext-page">
@@ -80,48 +67,32 @@ const CategoryBrowserPage = () => {
             <div className="page-content">
                 {categories.map((category) => (
                     <div key={category.originalName} style={{ marginBottom: '50px' }}>
-                        <div style={{
-                            borderBottom: '2px solid #00ff00',
-                            marginBottom: '20px',
-                            paddingBottom: '10px'
-                        }}>
-                            <h2 style={{
-                                fontSize: '24px',
-                                color: '#00ff00',
-                                textShadow: '0 0 10px #00ff00'
-                            }}>
+                        <div style={{ borderBottom: '2px solid #00ff00', marginBottom: '20px', paddingBottom: '10px' }}>
+                            <h2 style={{ fontSize: '24px', color: '#00ff00' }}>
                                 {category.category}
                             </h2>
                             <p style={{ fontSize: '13px', color: '#00aa00', marginTop: '5px' }}>
-                                {category.description}
+                                {category.description} • {category.pages.length} stron
                             </p>
                         </div>
 
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                            gap: '20px'
-                        }}>
-                            {category.integrations.map((integration) => (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+                            {category.pages.map((page) => (
                                 <div
-                                    key={integration.pageNumber}
-                                    onClick={() => navigateToPage(integration.pageNumber)}
+                                    key={page.id}
+                                    onClick={() => navigate(`/pages/${page.pageNumber}`)}
                                     style={{
                                         border: '2px solid #00aa00',
                                         borderRadius: '8px',
                                         padding: '20px',
-                                        backgroundColor: integration.status === 'active' ? '#0a3d0a' : '#1a1a1a',
-                                        cursor: integration.status === 'active' ? 'pointer' : 'not-allowed',
-                                        transition: 'all 0.3s ease',
-                                        position: 'relative',
-                                        opacity: integration.status === 'active' ? 1 : 0.6
+                                        backgroundColor: '#0a3d0a',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease'
                                     }}
                                     onMouseEnter={(e) => {
-                                        if (integration.status === 'active') {
-                                            e.currentTarget.style.borderColor = '#00ff00';
-                                            e.currentTarget.style.transform = 'translateY(-5px)';
-                                            e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.3)';
-                                        }
+                                        e.currentTarget.style.borderColor = '#00ff00';
+                                        e.currentTarget.style.transform = 'translateY(-5px)';
+                                        e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.3)';
                                     }}
                                     onMouseLeave={(e) => {
                                         e.currentTarget.style.borderColor = '#00aa00';
@@ -129,90 +100,21 @@ const CategoryBrowserPage = () => {
                                         e.currentTarget.style.boxShadow = 'none';
                                     }}
                                 >
-                                    {integration.status === 'soon' && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: '10px',
-                                            right: '10px',
-                                            backgroundColor: '#ffaa00',
-                                            color: '#000',
-                                            padding: '4px 12px',
-                                            borderRadius: '4px',
-                                            fontSize: '11px',
-                                            fontWeight: 'bold'
-                                        }}>
-                                            WKRÓTCE
-                                        </div>
-                                    )}
-
-                                    {integration.status === 'active' && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: '10px',
-                                            right: '10px',
-                                            backgroundColor: '#00ff00',
-                                            color: '#000',
-                                            padding: '4px 12px',
-                                            borderRadius: '4px',
-                                            fontSize: '11px',
-                                            fontWeight: 'bold'
-                                        }}>
-                                            AKTYWNE
-                                        </div>
-                                    )}
-
-                                    <div style={{
-                                        fontSize: '48px',
-                                        textAlign: 'center',
-                                        marginBottom: '15px'
-                                    }}>
-                                        {integration.icon}
-                                    </div>
-
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        marginBottom: '12px'
-                                    }}>
-                                        <h3 style={{
-                                            fontSize: '18px',
-                                            color: '#00ff00',
-                                            margin: 0
-                                        }}>
-                                            {integration.name}
-                                        </h3>
-                                    </div>
-
-                                    <p style={{
-                                        fontSize: '13px',
-                                        color: '#00aa00',
-                                        marginBottom: '12px',
-                                        minHeight: '40px'
-                                    }}>
-                                        {integration.description}
-                                    </p>
+                                    <h3 style={{ fontSize: '18px', color: '#00ff00', margin: '0 0 12px 0' }}>
+                                        {page.title}
+                                    </h3>
 
                                     <div style={{
                                         display: 'flex',
                                         justifyContent: 'space-between',
-                                        alignItems: 'center',
                                         paddingTop: '12px',
                                         borderTop: '1px solid #003300'
                                     }}>
-                                        <span style={{
-                                            fontSize: '12px',
-                                            color: '#00aa00',
-                                            fontFamily: 'monospace'
-                                        }}>
-                                            KATEGORIA: {integration.category}
+                                        <span style={{ fontSize: '12px', color: '#00aa00' }}>
+                                            {category.originalName}
                                         </span>
-                                        <span style={{
-                                            fontSize: '16px',
-                                            color: '#00ff00',
-                                            fontWeight: 'bold'
-                                        }}>
-                                            {integration.pageNumber}
+                                        <span style={{ fontSize: '16px', color: '#00ff00', fontWeight: 'bold' }}>
+                                            {page.pageNumber}
                                         </span>
                                     </div>
                                 </div>
@@ -222,23 +124,9 @@ const CategoryBrowserPage = () => {
                 ))}
             </div>
 
-            <div style={{
-                marginTop: '40px',
-                padding: '20px',
-                border: '1px solid #00aa00',
-                backgroundColor: '#0a0a0a',
-                textAlign: 'center'
-            }}>
-                <p style={{ fontSize: '12px', color: '#00aa00', marginBottom: '5px' }}>
-                    📊 Łącznie integracji: {categories.reduce((sum, cat) => sum + cat.integrations.length, 0)}
-                </p>
+            <div style={{ marginTop: '40px', padding: '20px', border: '1px solid #00aa00', backgroundColor: '#0a0a0a', textAlign: 'center' }}>
                 <p style={{ fontSize: '12px', color: '#00aa00' }}>
-                    ✅ Aktywne: {categories.reduce((sum, cat) =>
-                    sum + cat.integrations.filter(i => i.status === 'active').length, 0
-                )} |
-                    ⏳ Wkrótce: {categories.reduce((sum, cat) =>
-                    sum + cat.integrations.filter(i => i.status === 'soon').length, 0
-                )}
+                    📊 Łącznie stron: {categories.reduce((sum, cat) => sum + cat.pages.length, 0)} | 📁 Kategorii: {categories.length}
                 </p>
             </div>
         </div>
