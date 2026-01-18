@@ -26,17 +26,18 @@ Aplikacja integruje się z zewnętrznymi API poprzez warstwę backendową. Front
 
 ### ✅ Zaimplementowane integracje:
 
-| Integracja | Status | Strona | Źródło danych | Opis |
-|------------|--------|--------|---------------|------|
-| 🌤️ **Pogoda** | ✅ Działająca | 502 | OpenMeteo API | Prognoza 7-dniowa dla wybranego miasta |
-| 📰 **Wiadomości** | ✅ Działająca | 102 | NewsData API | Najnowsze artykuły informacyjne |
-| 💱 **Kursy walut** | ✅ Działająca | 801 | NBP API | Aktualne kursy wymiany walut |
+| Integracja | Status       | Strona | Źródło danych | Opis |
+|------------|--------------|--------|---------------|------|
+| 🌤️ **Pogoda** | ✅ Działająca | 501 | OpenMeteo API | Prognoza 7-dniowa dla Wrocławia |
+| 📰 **Wiadomości** | ✅ Działająca | 101, 102 | NewsData API | Najnowsze artykuły informacyjne |
+| 💱 **Kursy walut** | ✅ Działająca | 801, 802 | NBP API | Aktualne kursy wymiany walut (USD, EUR) |
 | 🎰 **Lotto** | ✅ Działająca | 302 | Totalizator Sportowy API | Wyniki ostatniego losowania |
-| 💼 **Oferty pracy** | ⏳ W trakcie | 601 | Jooble API | Wyszukiwarka ofert pracy IT |
-| 🔮 **Horoskop** | ⏳ W trakcie | 701 | Horoskop API | Horoskop dzienny dla znaków zodiaku |
-| ⚽ **Tabela ligowa** | ⏳ W trakcie | 201 | Highlightly API | Tabele sportowe |
-| 🏆 **Mecze** | ⏳ W trakcie | 202 | Highlightly API | Wyniki i terminarz meczów |
-| 📺 **Program TV** | ⏳ W trakcie | 401 | TVP API | Ramówka telewizyjna |
+| ⚽ **Tabela Ekstraklasy** | ✅ Działająca | 201 | Highlightly API | Tabela ligowa Ekstraklasy |
+| 🏆 **Mecze Ekstraklasy** | ✅ Działająca | 202, 203 | Highlightly API | Wyniki i terminarz meczów |
+| 💼 **Oferty pracy** | ⚠️ W budowie | 601 | Jooble API | Wyszukiwarka ofert pracy IT |
+| 🔮 **Horoskop** | ⚠️ W budowie | 701 | Horoskop API | Horoskop dzienny dla znaków zodiaku |
+| 📺 **Program TV** | 🚧 Planowane | 401 | TVP API | Ramówka telewizyjna |
+| 📄 **Strony manualne** | ✅ Działająca | 900-999 | Baza danych | Strony tworzone przez administratora |
 
 ### Architektura komunikacji:
 ```
@@ -152,14 +153,17 @@ teletext-dev/
 │   │   │   └── ProtectedRoute.jsx
 │   │   ├── pages/
 │   │   │   ├── integrations/    # Strony z integracjami API
-│   │   │   │   ├── WeatherPage.jsx    (502)
-│   │   │   │   ├── NewsPage.jsx       (102)
-│   │   │   │   ├── CurrencyPage.jsx   (801)
+│   │   │   │   ├── WeatherPage.jsx    (501)
+│   │   │   │   ├── NewsPage.jsx       (101, 102)
+│   │   │   │   ├── CurrencyPage.jsx   (801, 802)
 │   │   │   │   ├── LotteryPage.jsx    (302)
-│   │   │   │   └── JobsPage.jsx       (601)
+│   │   │   │   ├── SportsPage.jsx     (201)
+│   │   │   │   ├── MatchesPage.jsx    (202, 203)
+│   │   │   │   └── JobsPage.jsx       (601) - w budowie
+│   │   │   ├── ManualPageWrapper.jsx  # Strony manualne (900-999)
+│   │   │   ├── DynamicPageView.jsx    # Router stron (MANUAL/TEMPLATE)
+│   │   │   ├── CategoryBrowserPage.jsx # Lista stron (dynamiczna)
 │   │   │   ├── HomePage.jsx
-│   │   │   ├── PageListPage.jsx
-│   │   │   ├── PageViewPage.jsx
 │   │   │   └── Admin*.jsx       # Panel admina
 │   │   ├── services/
 │   │   │   └── api.jsx          # API client
@@ -196,12 +200,15 @@ teletext-dev/
 | URL | Opis |
 |-----|------|
 | `/` | Strona główna z nawigacją |
-| `/pages` | Lista wszystkich stron telegazety |
+| `/pages` | Lista wszystkich stron telegazety (dynamiczna z bazy) |
 | `/pages/:pageNumber` | Podgląd konkretnej strony |
-| `/pages/502` | Pogoda - prognoza 7-dniowa |
-| `/pages/102` | Wiadomości - najnowsze artykuły |
-| `/pages/801` | Kursy walut - EUR/PLN z NBP |
+| `/pages/501` | Pogoda - prognoza 7-dniowa dla Wrocławia |
+| `/pages/101` `/pages/102` | Wiadomości - najnowsze artykuły |
+| `/pages/801` `/pages/802` | Kursy walut - USD/EUR z NBP |
 | `/pages/302` | Lotto - wyniki ostatniego losowania |
+| `/pages/201` | Tabela Ekstraklasy |
+| `/pages/202` `/pages/203` | Mecze Ekstraklasy |
+| `/pages/9XX` | Strony manualne (900-999) tworzone przez admina |
 
 ### Panel administratora:
 
@@ -292,10 +299,10 @@ WEBCLIENT_HIGHLIGHTLY_SECRET=xxxxx
 
 ## 👥 Autorzy
 
-- [Sebastian Górski](https://github.com/sgorski00/) 
+- [Sebastian Górski](https://github.com/sgorski00/)
 - [Jakub Grzymisławski](https://github.com/jgrzymislawski/)
-- [Łukasz Szenkiel](https://github.com/lukaszsz1991/) 
-- [Rafał Wilczewski](https://github.com/Rafal-wq/) 
+- [Łukasz Szenkiel](https://github.com/lukaszsz1991/)
+- [Rafał Wilczewski](https://github.com/Rafal-wq/)
 
 ---
 
