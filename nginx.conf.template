@@ -27,7 +27,7 @@ http {
 
     # api reverse proxy
     location /api/ {
-      proxy_pass ${BACKEND_INTERNAL_URL}/api/;
+      proxy_pass ${BACKEND_URL}/api/;
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -36,7 +36,7 @@ http {
 
     # Swagger
     location /swagger-ui/ {
-      proxy_pass ${BACKEND_INTERNAL_URL}/swagger-ui/;
+      proxy_pass ${BACKEND_URL}/swagger-ui/;
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -44,7 +44,7 @@ http {
     }
 
     location /v3/api-docs/ {
-      proxy_pass ${BACKEND_INTERNAL_URL}/v3/api-docs/;
+      proxy_pass ${BACKEND_URL}/v3/api-docs/;
       proxy_set_header Host $host;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_set_header X-Forwarded-Proto $scheme;

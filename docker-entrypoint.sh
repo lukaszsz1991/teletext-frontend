@@ -1,10 +1,10 @@
 #!/bin/sh
 set -e
 
-: "${BACKEND_INTERNAL_URL:?BACKEND_INTERNAL_URL is required}"
+: "${BACKEND_URL:?BACKEND_URL is required}"
 : "${REACT_APP_API_URL:?REACT_APP_API_URL is required}"
 
-envsubst '${BACKEND_INTERNAL_URL}' \
+envsubst '${BACKEND_URL}' \
   < /etc/nginx/templates/nginx.conf.template \
   > /etc/nginx/nginx.conf
 
