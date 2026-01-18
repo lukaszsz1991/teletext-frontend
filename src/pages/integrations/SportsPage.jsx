@@ -51,9 +51,9 @@ function SportsPage() {
     }, []);
 
     const getTeamClass = (position) => {
-        if (position <= 2) return 'champions-league';
-        if (position === 3) return 'europa-league';
-        if (position >= 17) return 'relegation';
+        if (position <= 2) return 'champions-league';        // 1-2: Liga Mistrzów
+        if (position >= 3 && position <= 4) return 'europa-league';  // 3-4: Liga Konferencji
+        if (position >= 16) return 'relegation';             // 16-18: Spadek
         return '';
     };
 
@@ -151,9 +151,9 @@ function SportsPage() {
 
                         <div className="sports-legend">
                             <p>
-                                <span className="legend-item champions-league">Liga Mistrzów</span>
-                                <span className="legend-item europa-league">Liga Europy</span>
-                                <span className="legend-item relegation">Spadek</span>
+                                <span className="legend-item champions-league">Liga Mistrzów (1-2)</span>
+                                <span className="legend-item europa-league">Liga Konferencji (3-4)</span>
+                                <span className="legend-item relegation">Spadek (16-18)</span>
                             </p>
                         </div>
 

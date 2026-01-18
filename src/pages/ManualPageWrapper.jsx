@@ -64,7 +64,6 @@ function ManualPageWrapper() {
         );
     }
 
-    // Wydobądź dane które FAKTYCZNIE ISTNIEJĄ
     const title = pageData.content?.title || `Strona ${pageNumber}`;
     const description = pageData.content?.description || '';
     const categoryName = pageData.category?.category || 'MISC';
@@ -106,10 +105,10 @@ function ManualPageWrapper() {
                     color: '#888'
                 }}>
                     <p style={{ fontSize: '14px', marginBottom: '10px' }}>
-                        💡 To jest strona manualna (MANUAL)
+                        🚧 Strona w budowie
                     </p>
                     <p style={{ fontSize: '12px' }}>
-                        Pełna treść będzie dostępna po rozbudowie backendu
+                        Pełna treść wkrótce dostępna
                     </p>
                 </div>
 
