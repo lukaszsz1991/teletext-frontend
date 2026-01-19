@@ -2,15 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import '../../styles/teletext.css';
-
-const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/api';
-
+const API_BASE_URL = window.env?.REACT_APP_API_URL || 'http://localhost:8080/api';
 function AdminIntegrations() {
     const navigate = useNavigate();
     const [templates, setTemplates] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
     const integrationInfo = {
         'EXCHANGE_RATE': { icon: '💱', name: 'Kursy Walut', color: '#ffaa00' },
         'WEATHER': { icon: '🌤️', name: 'Pogoda', color: '#00aaff' },
@@ -103,7 +100,6 @@ function AdminIntegrations() {
             </AdminLayout>
         );
     }
-
     if (error) {
         return (
             <AdminLayout>
@@ -130,8 +126,8 @@ function AdminIntegrations() {
             </div>
 
             <div className="button-group" style={{ marginBottom: '30px' }}>
-                <button className="btn" onClick={() => navigate('/admin/pages/new')}>
-                    ➕ Dodaj nową stronę
+                <button className="btn" onClick={() => navigate('/admin/templates/new')}>
+                    ➕ Dodaj nową integrację
                 </button>
                 <button className="btn" onClick={fetchTemplates}>
                     🔄 Odśwież listę
@@ -176,6 +172,20 @@ function AdminIntegrations() {
                                         </div>
                                         <div className="template-actions">
                                             <button
+                                                className="btn btn-small btn-add"
+                                                onClick={() => navigate('/admin/templates/new')}
+                                                title="Dodaj nową integrację"
+                                                style={{
+                                                    backgroundColor: '#003300',
+                                                    borderColor: '#00ff00',
+                                                    color: '#00ff00',
+                                                    fontSize: '16px',
+                                                    fontWeight: 'bold'
+                                                }}
+                                            >
+                                                ➕
+                                            </button>
+                                            <button
                                                 className="btn btn-small btn-preview"
                                                 onClick={() => navigate(`/admin/templates/${template.id}`)}
                                                 title="Szczegóły"
@@ -219,5 +229,4 @@ function AdminIntegrations() {
         </AdminLayout>
     );
 }
-
 export default AdminIntegrations;

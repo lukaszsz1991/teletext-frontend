@@ -1,6 +1,5 @@
 import HomePage from "./pages/HomePage.jsx";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import PageListPage from "./pages/PageListPage.jsx";
 import AdminLogin from "./pages/admin/AdminLogin.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import AdminPages from "./pages/admin/AdminPages.jsx";
@@ -9,14 +8,7 @@ import AdminIntegrations from "./pages/admin/AdminIntegrations.jsx";
 import AdminStats from "./pages/admin/AdminStats.jsx";
 import TemplateDetailPage from "./pages/admin/TemplateDetailPage.jsx";
 import TemplateEditPage from "./pages/admin/TemplateEditPage.jsx";
-import PageViewPage from "./pages/PageViewPage.jsx";
-import WeatherPage from "./pages/integrations/WeatherPage.jsx";
-import CurrencyPage from "./pages/integrations/CurrencyPage.jsx";
-import NewsPage from "./pages/integrations/NewsPage.jsx";
-import JobsPage from "./pages/integrations/JobsPage.jsx";
-import LotteryPage from "./pages/integrations/Lotterypage.jsx";
-import SportsPage from "./pages/integrations/SportsPage.jsx";
-import MatchesPage from "./pages/integrations/Matchespage.jsx";
+import TemplateAddPage from "./pages/admin/TemplateAddPage.jsx";
 import CategoryBrowserPage from './pages/CategoryBrowserPage';
 import DynamicPageView from './pages/DynamicPageView';
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -28,10 +20,11 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/pages" element={<CategoryBrowserPage />} />
 
-                {/* Jeden routing dla WSZYSTKICH stron - DynamicPageView sam decyduje */}
                 <Route path="/pages/:pageNumber" element={<DynamicPageView />} />
 
                 <Route path="/admin/login" element={<AdminLogin />} />
+
+                <Route path="/admin/templates/new" element={<TemplateAddPage />} />
 
                 <Route
                     path="/admin/dashboard"
