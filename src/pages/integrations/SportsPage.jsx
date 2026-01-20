@@ -22,16 +22,35 @@ function SportsPage() {
             const response = await fetch(`${API_BASE_URL}/public/pages/${pageNumber}`);
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                if (response.status === 429) {
+                    throw new Error('Rate limit przekroczony - zbyt wiele zapytań do API. Spróbuj ponownie za kilka minut.');
+                }
+                if (response.status === 404) {
+                    throw new Error(`Strona ${pageNumber} nie istnieje.`);
+                }
+                if (response.status === 500) {
+                    throw new Error('Błąd serwera - nie pobrno danych.');
+                }
+                throw new Error(`Błąd HTTP ${response.status}: ${response.statusText}`);
             }
 
             const data = await response.json();
+
+            if (!data.content || !data.content.additionalData) {
+                throw new Error('Nieprawidłowe dane - brak zawartości.');
+            }
+
+            const standings = data.content.additionalData.Standings || data.content.additionalData.standings;
+
+            if (!standings) {
+                console.warn('Brak danych z zewnętrznego API');
+            }
 
             setSportsData({
                 pageNumber: data.pageNumber,
                 title: data.content.title,
                 description: data.content.description,
-                standings: data.content.additionalData.Standings || data.content.additionalData.standings,
+                standings: standings || [],
                 source: data.content.source,
                 updatedAt: data.content.updatedAt
             });
@@ -39,7 +58,7 @@ function SportsPage() {
             setLoading(false);
         } catch (error) {
             console.error('Błąd podczas pobierania tabeli Ekstraklasy:', error);
-            setError('Nie udało się pobrać tabeli ligowej');
+            setError(error.message || 'Nie udało się pobrać tabeli ligowej');
             setLoading(false);
         }
     };
@@ -110,7 +129,7 @@ function SportsPage() {
 ╚═══════════════════════════════════╝`}
                 </div>
 
-                {sportsData && sportsData.standings && (
+                {sportsData && sportsData.standings && sportsData.standings.length > 0 ? (
                     <div className="info-section">
                         <div className="sports-info">
                             <p>{sportsData.description}</p>
@@ -169,6 +188,15 @@ function SportsPage() {
                                 ⚽ Źródło: {sportsData.source} | Ostatnia aktualizacja: {new Date(sportsData.updatedAt).toLocaleString('pl-PL')}
                             </p>
                         </div>
+                    </div>
+                ) : (
+                    <div className="info-section" style={{ textAlign: 'center', padding: '40px' }}>
+                        <p style={{ fontSize: '18px', color: '#ffaa00', marginBottom: '15px' }}>
+                            📊 Brak tabeli do wyświetlenia
+                        </p>
+                        <p style={{ fontSize: '14px', color: '#00aa00' }}>
+                            {sportsData?.description || 'Nie znaleziono tabeli ligowej'}
+                        </p>
                     </div>
                 )}
 

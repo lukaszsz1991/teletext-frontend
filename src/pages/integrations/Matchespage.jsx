@@ -5,7 +5,7 @@ import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import '../../styles/teletext.css';
 
-const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = window.env?.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 function MatchesPage() {
     const navigate = useNavigate();
@@ -13,25 +13,51 @@ function MatchesPage() {
     const [matchesData, setMatchesData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [warning, setWarning] = useState(null);
 
     const fetchMatchesData = async () => {
         setLoading(true);
         setError(null);
+        setWarning(null);
 
         try {
             const response = await fetch(`${API_BASE_URL}/public/pages/${pageNumber}`);
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                if (response.status === 429) {
+                    throw new Error('Rate limit przekroczony (HTTP 429) - zbyt wiele zapytań do API. Spróbuj ponownie za kilka minut.');
+                }
+                if (response.status === 404) {
+                    throw new Error(`Strona ${pageNumber} nie istnieje (HTTP 404).`);
+                }
+                if (response.status === 500) {
+                    throw new Error('Błąd serwera (HTTP 500) - nie pobrano danych.');
+                }
+                throw new Error(`Błąd HTTP ${response.status}: ${response.statusText}`);
             }
 
             const data = await response.json();
+
+            if (!data.content || !data.content.additionalData) {
+                throw new Error('Brak treści ido wyświetlenia.');
+            }
+
+            const matches = data.content.additionalData.Matches || data.content.additionalData.matches;
+
+            if (!matches || matches.length === 0) {
+                const warningMsg = !matches
+                    ? 'Brak danych z zewnętrznego API (Highlightly). Może to być spowodowane przekroczeniem limitu zapytań lub brakiem meczów w wybranym tygodniu.'
+                    : 'Pustą listę meczów lub brak meczów w wybranym tygodniu.';
+
+                console.warn(warningMsg);
+                setWarning(warningMsg);
+            }
 
             setMatchesData({
                 pageNumber: data.pageNumber,
                 title: data.content.title,
                 description: data.content.description,
-                matches: data.content.additionalData.matches,
+                matches: matches || [],
                 source: data.content.source,
                 updatedAt: data.content.updatedAt
             });
@@ -39,15 +65,13 @@ function MatchesPage() {
             setLoading(false);
         } catch (error) {
             console.error('Błąd podczas pobierania meczów Ekstraklasy:', error);
-            setError('Nie udało się pobrać listy meczów');
+            setError(error.message || 'Nie udało się pobrać listy meczów');
             setLoading(false);
         }
     };
 
     useEffect(() => {
         fetchMatchesData();
-        const interval = setInterval(fetchMatchesData, 2 * 60 * 1000);
-        return () => clearInterval(interval);
     }, [pageNumber]);
 
     const formatDate = (dateString) => {
@@ -126,12 +150,29 @@ function MatchesPage() {
                 </div>
 
                 <div className="ascii-art" style={{ textAlign: 'center', margin: '20px 0', fontSize: '14px' }}>
-                    {`╔══════════════════════════════════╗
+                    {`╔═══════════════════════════════════╗
 ║      MECZE EKSTRAKLASY           ║
-╚══════════════════════════════════╝`}
+╚═══════════════════════════════════╝`}
                 </div>
 
-                {matchesData && (
+                {warning && (
+                    <div className="info-section" style={{
+                        textAlign: 'center',
+                        padding: '20px',
+                        border: '2px solid #ffaa00',
+                        backgroundColor: '#1a1a00',
+                        marginBottom: '20px'
+                    }}>
+                        <h3 style={{ fontSize: '18px', color: '#ffaa00', marginBottom: '10px' }}>
+                            ⚠️ Ostrzeżenie
+                        </h3>
+                        <p style={{ fontSize: '14px', color: '#ffcc66', lineHeight: '1.6' }}>
+                            {warning}
+                        </p>
+                    </div>
+                )}
+
+                {matchesData && matchesData.matches && matchesData.matches.length > 0 ? (
                     <div className="info-section">
                         <div style={{
                             textAlign: 'center',
@@ -241,6 +282,20 @@ function MatchesPage() {
                                 ⚽ Źródło: Highlightly API | Ostatnia aktualizacja: {new Date(matchesData.updatedAt).toLocaleString('pl-PL')}
                             </p>
                         </div>
+                    </div>
+                ) : (
+                    <div className="info-section" style={{ textAlign: 'center', padding: '40px' }}>
+                        <p style={{ fontSize: '18px', color: '#ffaa00', marginBottom: '15px' }}>
+                            ⚽ Brak meczów do wyświetlenia
+                        </p>
+                        <p style={{ fontSize: '14px', color: '#00aa00', marginBottom: '20px' }}>
+                            {matchesData?.description || 'Nie znaleziono meczów dla wybranego tygodnia'}
+                        </p>
+                        {!warning && (
+                            <p style={{ fontSize: '12px', color: '#888' }}>
+                                Jeśli problem się powtarza, sprawdź konfigurację szablonu lub skontaktuj się z administratorem.
+                            </p>
+                        )}
                     </div>
                 )}
 
