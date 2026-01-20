@@ -1,304 +1,328 @@
-# Teletext - System Zarządzania Telegazetą
-
-Aplikacja **Teletext** to nowoczesny system zarządzania treścią w stylu retro telegazety z lat 80/90. Projekt składa się z frontendu (React) i backendu (Spring Boot).
-
----
-
-## 🎯 Funkcjonalności
-
-### Portal Czytelnika
-- 📺 **Lista stron telegazety** - przeglądanie wszystkich dostępnych stron
-- 📄 **Podgląd stron** - wyświetlanie treści stron
-- 🔴 **Integracje na żywo** - dane z zewnętrznych API w czasie rzeczywistym
-
-### Panel Administratora
-- 🔐 **Logowanie** (JWT authentication)
-- 📊 **Dashboard** - panel główny z informacjami
-- 📝 **Zarządzanie stronami** - CRUD dla stron telegazety
-- 🔌 **Konfiguracja integracji** - ustawienia zewnętrznych API
-- 📈 **Statystyki** - odwiedziny stron
+## Spis treści
+- [Jak pracować z submodułami](jak-pracować-z-submodułami)
+- [Docker Compose](#docker-compose)
+- [Makefile](#makefile)
+- [Tworzenie nowych stron](#tworzenie-nowych-stron)
+- [Autorzy](#autorzy)
 
 ---
 
-## 🌐 Integracje API
+## Jak pracować z submodułami
 
-Aplikacja integruje się z zewnętrznymi API poprzez warstwę backendową. Frontend komunikuje się wyłącznie z endpointami backendu (Spring Boot), który z kolei pobiera dane z zewnętrznych serwisów.
+Każdy submoduł jest osobnym repozytorium Git. Wchodząc do odpowiedniego podfolderu (`backend` lub `frontend`) pracujemy w tym repozytorium. Oznacza to, że możemy w nim tworzyć gałęzie, aktualizować kod, robić commity, PR itd.
 
-### ✅ Zaimplementowane integracje:
+:exclamation: Po wdrożeniu zmian w submodułach w branchu `main`, należy zaktualizować repozytorium `teletext-dev`:
 
-| Integracja | Status       | Strona | Źródło danych | Opis |
-|------------|--------------|--------|---------------|------|
-| 🌤️ **Pogoda** | ✅ Działająca | 501 | OpenMeteo API | Prognoza 7-dniowa dla Wrocławia |
-| 📰 **Wiadomości** | ✅ Działająca | 101, 102 | NewsData API | Najnowsze artykuły informacyjne |
-| 💱 **Kursy walut** | ✅ Działająca | 801, 802 | NBP API | Aktualne kursy wymiany walut (USD, EUR) |
-| 🎰 **Lotto** | ✅ Działająca | 302 | Totalizator Sportowy API | Wyniki ostatniego losowania |
-| ⚽ **Tabela Ekstraklasy** | ✅ Działająca | 201 | Highlightly API | Tabela ligowa Ekstraklasy |
-| 🏆 **Mecze Ekstraklasy** | ✅ Działająca | 202, 203 | Highlightly API | Wyniki i terminarz meczów |
-| 💼 **Oferty pracy** | ⚠️ W budowie | 601 | Jooble API | Wyszukiwarka ofert pracy IT |
-| 🔮 **Horoskop** | ⚠️ W budowie | 701 | Horoskop API | Horoskop dzienny dla znaków zodiaku |
-| 📺 **Program TV** | 🚧 Planowane | 401 | TVP API | Ramówka telewizyjna |
-| 📄 **Strony manualne** | ✅ Działająca | 900-999 | Baza danych | Strony tworzone przez administratora |
-
-### Architektura komunikacji:
-```
-Frontend (React) → Backend API (Spring Boot) → External APIs
-```
-
-Korzyści z pośrednictwa backendu:
-- Bezpieczne przechowywanie kluczy API
-- Możliwość cache'owania odpowiedzi
-- Ujednolicone obsługiwanie błędów
-- Transformacja danych do spójnego formatu
-
----
-
-## 🎨 Design
-
-Aplikacja stylizowana na klasyczną telegazetę:
-- ⬛ Czarne tło z zielonym tekstem (#00ff00)
-- 🔤 Font monospace (Courier New)
-- 📺 Efekty CRT (scanlines, flicker, glow)
-- 🎭 ASCII art w nagłówkach
-- 📱 Responsywny design
-
----
-
-## 🛠️ Technologie
-
-### Frontend
-- **React** 19 + **Vite** - nowoczesny stack
-- **React Router** 6 - routing SPA
-- **Vanilla CSS** - stylizacja bez frameworków
-- **Fetch API** - komunikacja z backendem
-
-### Backend
-- **Spring Boot** 3.4.1 (Java 21)
-- **PostgreSQL** 17.2 - baza danych
-- **Redis** 8.4.0 - cache
-- **JWT** - autentykacja
-- **WebClient** - komunikacja z zewnętrznymi API
-- **Flyway** - migracje bazy danych
-- **Docker** - konteneryzacja
-
----
-
-## 🚀 Szybki start (Docker)
-
-### Wymagania:
-- Docker 24.0+
-- Docker Compose 2.22+
-- Make (opcjonalnie)
-
-### Uruchomienie całego projektu:
 ```bash
-# Sklonuj repozytorium
-git clone https://github.com/lukaszsz1991/teletext-dev.git
+make rebase # (opcjonalnie)
+make push-backend # dla zmian w backendzie
+make push-frontend # dla zmian w frontendzie
+```
+
+lub dla większej kontroli (np. modyfikacja commit message):
+
+```bash
 cd teletext-dev
-
-# Uruchom wszystkie serwisy
-make build-up
-
-# Lub bez Make:
-docker-compose up --build
+make rebase
+git add backend # lub git add frontend, w zależności od zaktualizowanego repozytorium
+git commit -m "chore: update submodules"
+git push -u origin xxx # xxx należy zastąpić aktualnym lokalnym branchem
 ```
 
-**Aplikacja dostępna pod:**
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8080
-- Swagger UI: http://localhost:8080/swagger-ui/index.html
+> Ten commit w `teletext-dev` aktualizuje referencję submodułu do najnowszej wersji `main` i pozwala wszystkim współpracownikom pobrać aktualny stan projektu.
 
-### Dostępne komendy Make:
+### Aktualizacja submodułów
 
-| Komenda | Opis |
-|---------|------|
-| `make build-up` | Buduje i uruchamia wszystkie kontenery |
-| `make down` | Zatrzymuje wszystkie kontenery |
-| `make restart-backend` | Restartuje backend |
-| `make restart-frontend` | Restartuje frontend |
-| `make logs-backend` | Logi backendu |
-| `make logs-frontend` | Logi frontendu |
+Przed rozpoczęciem pracy warto upewnić się, że wszystkie repozytoria są aktualne.
 
----
-
-## 💻 Rozwój lokalny (bez Dockera)
-
-### Frontend:
+W tym celu wystarczy uruchomić komendę:
 ```bash
-cd frontend
-npm install
-npm run dev
+make rebase
 ```
 
-Dostępny na: http://localhost:3000
-
-### Backend:
+Pod tą komendą kryje się ten skrypt:
 ```bash
-cd backend
-./mvnw spring-boot:run
+git pull --rebase
+git submodule update --init --recursive --remote --jobs 2
 ```
 
-Dostępny na: http://localhost:8080
-
-**Wymagane:** PostgreSQL i Redis działające lokalnie
+Wykonanie jednej z powyższych komend spowoduje pobranie najnowszej wersji repozytoriów z branchy `main`.
 
 ---
 
-## 📂 Struktura projektu
-```
-teletext-dev/
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── layout/          # Header, Footer, Scanlines
-│   │   │   └── ProtectedRoute.jsx
-│   │   ├── pages/
-│   │   │   ├── integrations/    # Strony z integracjami API
-│   │   │   │   ├── WeatherPage.jsx    (501)
-│   │   │   │   ├── NewsPage.jsx       (101, 102)
-│   │   │   │   ├── CurrencyPage.jsx   (801, 802)
-│   │   │   │   ├── LotteryPage.jsx    (302)
-│   │   │   │   ├── SportsPage.jsx     (201)
-│   │   │   │   ├── MatchesPage.jsx    (202, 203)
-│   │   │   │   └── JobsPage.jsx       (601) - w budowie
-│   │   │   ├── ManualPageWrapper.jsx  # Strony manualne (900-999)
-│   │   │   ├── DynamicPageView.jsx    # Router stron (MANUAL/TEMPLATE)
-│   │   │   ├── CategoryBrowserPage.jsx # Lista stron (dynamiczna)
-│   │   │   ├── HomePage.jsx
-│   │   │   └── Admin*.jsx       # Panel admina
-│   │   ├── services/
-│   │   │   └── api.jsx          # API client
-│   │   ├── styles/
-│   │   │   └── teletext.css
-│   │   └── App.jsx
-│   └── Dockerfile
-├── backend/
-│   ├── src/main/java/.../
-│   │   ├── api/                 # Kontrolery REST
-│   │   ├── config/              # Konfiguracja (Security, CORS)
-│   │   ├── integration/         # Serwisy integracji z API
-│   │   ├── teletext/            # Logika biznesowa
-│   │   │   ├── page/            # Zarządzanie stronami
-│   │   │   ├── template/        # Szablony stron
-│   │   │   └── schema/          # Walidacja konfiguracji
-│   │   └── common/
-│   └── Dockerfile
-├── docker-files/
-│   └── postgres/
-│       └── init.sql             # Inicjalizacja bazy
-├── compose.yml                  # Docker Compose
-├── Makefile                     # Skróty komend
-├── .env                         # Konfiguracja backendu
-└── .env.webclient               # Klucze API
-```
+## Docker Compose
+
+Wykorzystujemy Docker Compose do uruchamiania wszystkich serwisów lokalnie, w tym:
+- bazę danych PostgreSQL (`postgres`)
+- backend Spring Boot (`backend`)
+- frontend React + Nginx (`frontend`)
+
+### Uruchomienie
+1. Upewnij się, że masz zainstalowanego Dockera.
+2. Skopiuj plik `.env.example` do `.env` i dostosuj zmienne środowiskowe według potrzeb.
+3. Wykonaj powyższy punkt dla `.env.webclient.example`, kopiując go do `.env.webclient`.
+4. Uruchom serwisy za pomocą komendy:
+   ```bash
+   docker-compose up --build -d
+   ```
+
+   lub użyj:
+
+   ```bash
+   make build-up
+   ```
 
 ---
 
-## 🌐 Routing
+## Makefile
 
-### Strony publiczne:
+Pomocne komendy do pracy nad projektem:
 
-| URL | Opis |
-|-----|------|
-| `/` | Strona główna z nawigacją |
-| `/pages` | Lista wszystkich stron telegazety (dynamiczna z bazy) |
-| `/pages/:pageNumber` | Podgląd konkretnej strony |
-| `/pages/501` | Pogoda - prognoza 7-dniowa dla Wrocławia |
-| `/pages/101` `/pages/102` | Wiadomości - najnowsze artykuły |
-| `/pages/801` `/pages/802` | Kursy walut - USD/EUR z NBP |
-| `/pages/302` | Lotto - wyniki ostatniego losowania |
-| `/pages/201` | Tabela Ekstraklasy |
-| `/pages/202` `/pages/203` | Mecze Ekstraklasy |
-| `/pages/9XX` | Strony manualne (900-999) tworzone przez admina |
-
-### Panel administratora:
-
-| URL | Opis |
-|-----|------|
-| `/admin/login` | Logowanie (publiczne) |
-| `/admin/dashboard` | Panel główny ⚠️ |
-| `/admin/pages` | Zarządzanie stronami ⚠️ |
-| `/admin/stats` | Statystyki ⚠️ |
-
-⚠️ Wymaga zalogowania (JWT token)
+| Komenda                 | Opis                                                     |
+|-------------------------|----------------------------------------------------------|
+| `make rebase`           | Aktualizuje repozytorium i submoduły                     |
+| `make push-backend`     | Wypycha zmiany w backendzie do zdalnego repozytorium     |
+| `make push-frontend`    | Wypycha zmiany w frontendzie do zdalnego repozytorium    |
+| `make build`            | Buduje obrazy Docker dla wszystkich serwisów             |
+| `make build-up`         | Buduje i uruchamia obrazy Docker dla wszystkich serwisów |
+| `make up`               | Uruchamia serwisy Docker Compose                         |
+| `make down`             | Zatrzymuje serwisy Docker Compose                        |
+| `make logs`             | Wyświetla logi wszystkich serwisów                       |
+| `make restart`          | Przebudowuje i restaruje wszystkie serwisy               |
+| `make restart-backend`  | Przebudowuje i restaruje backend aplikacji               |
+| `make restart-frontend` | Przebudowuje i restaruje frontend aplikacji              |
 
 ---
 
-## 🔐 Autoryzacja
+## Tworzenie nowych stron
 
-**Testowe dane logowania:**
-```
-Login: admin
-Hasło: admin
+System Telegazeta używa dwuetapowego procesu tworzenia stron:
+1. **Utworzenie szablonu (Template)** - definiuje źródło danych i konfigurację
+2. **Utworzenie strony (Page)** - przypisuje szablon do konkretnego numeru strony
+
+### Zakresy numeracji stron
+
+| Kategoria | Zakres stron | Opis |
+|-----------|--------------|------|
+| NEWS | 101-199 | Wiadomości |
+| SPORTS | 201-299 | Sport |
+| LOTTERY | 301-399 | Loterie |
+| TV | 401-499 | Program TV |
+| WEATHER | 501-599 | Pogoda |
+| JOBS | 601-699 | Oferty pracy |
+| HOROSCOPE | 701-799 | Horoskopy |
+| FINANCE | 801-899 | Finanse |
+| MISC | 901-999 | Różne |
+
+### Krok 1: Utworzenie szablonu
+
+Szablon tworzy się przez panel administracyjny (`/admin/templates/new`) lub API:
+
+```http
+POST /api/admin/templates
+Content-Type: application/json
+Authorization: Bearer {token}
 ```
 
-Token JWT przechowywany w `localStorage` jako `jwt_token`.
+#### Przykładowe konfiguracje dla różnych integracji:
+
+**Sport - Tabela ligowa:**
+```json
+{
+  "name": "Tabela Ekstraklasy 2025",
+  "source": "SPORT_TABLE",
+  "category": "SPORTS",
+  "configJson": {
+    "league": "ekstraklasa",
+    "season": "2025"
+  }
+}
+```
+
+**Sport - Mecze:**
+```json
+{
+  "name": "Mecze Ekstraklasy",
+  "source": "SPORT_MATCHES",
+  "category": "SPORTS",
+  "configJson": {
+    "league": "ekstraklasa",
+    "season": "2025",
+    "round": 15
+  }
+}
+```
+
+**Pogoda:**
+```json
+{
+  "name": "Pogoda Wrocław",
+  "source": "WEATHER",
+  "category": "WEATHER",
+  "configJson": {
+    "city": "Wrocław",
+    "days": 7
+  }
+}
+```
+
+**Horoskop:**
+```json
+{
+  "name": "Horoskop Baran",
+  "source": "HOROSCOPE",
+  "category": "HOROSCOPE",
+  "configJson": {
+    "sign": "aries"
+  }
+}
+```
+
+**Program TV:**
+```json
+{
+  "name": "Program TVP1",
+  "source": "TV_PROGRAM",
+  "category": "TV",
+  "configJson": {
+    "channelName": "TVP1",
+    "date": "2026-01-20"
+  }
+}
+```
+
+**Loteria:**
+```json
+{
+  "name": "Wyniki Lotto",
+  "source": "LOTTERY",
+  "category": "LOTTERY",
+  "configJson": {
+    "game": "lotto"
+  }
+}
+```
+
+**Kursy walut:**
+```json
+{
+  "name": "Kurs USD",
+  "source": "EXCHANGE_RATE",
+  "category": "FINANCE",
+  "configJson": {
+    "currency": "USD"
+  }
+}
+```
+
+**Oferty pracy:**
+```json
+{
+  "name": "Oferty pracy IT",
+  "source": "JOB_OFFERS",
+  "category": "JOBS",
+  "configJson": {
+    "keywords": "React",
+    "location": "Warsaw"
+  }
+}
+```
+
+**Wiadomości:**
+```json
+{
+  "name": "Wiadomości z Polski",
+  "source": "NEWS",
+  "category": "NEWS",
+  "configJson": {
+    "country": "pl",
+    "limit": 10
+  }
+}
+```
+
+**Strona manualna:**
+```json
+{
+  "name": "Strona informacyjna",
+  "source": "MANUAL",
+  "category": "MISC",
+  "configJson": {}
+}
+```
+
+### Krok 2: Utworzenie strony
+
+Po utworzeniu szablonu, tworzysz stronę przypisując jej:
+- **Numer strony** (z odpowiedniego zakresu)
+- **Kategorię**
+- **ID szablonu** (dla stron opartych na szablonach)
+
+Strona tworzy się przez panel administracyjny (`/admin/pages/new`) lub API:
+
+**Strona z szablonu:**
+```http
+POST /api/admin/pages
+Content-Type: application/json
+Authorization: Bearer {token}
+
+{
+  "type": "TEMPLATE",
+  "pageNumber": 201,
+  "category": "SPORTS",
+  "templateId": 1
+}
+```
+
+**Strona manualna:**
+```http
+POST /api/admin/pages
+Content-Type: application/json
+Authorization: Bearer {token}
+
+{
+  "type": "MANUAL",
+  "pageNumber": 901,
+  "category": "MISC",
+  "title": "O systemie Telegazeta",
+  "description": "Telegazeta to nowoczesny system teletekstu..."
+}
+```
+
+### Krok 3: Aktywacja strony
+
+Po utworzeniu strony należy ją aktywować:
+
+```http
+PATCH /api/admin/pages/{id}/activate
+Authorization: Bearer {token}
+```
+
+### Dostępne źródła danych (source)
+
+| Source | Opis | Wymagane pola w configJson |
+|--------|------|----------------------------|
+| `SPORT_TABLE` | Tabela ligowa | `league`, `season` |
+| `SPORT_MATCHES` | Mecze sportowe | `league`, `season`, `round` |
+| `WEATHER` | Prognoza pogody | `city`, `days` |
+| `HOROSCOPE` | Horoskop | `sign` |
+| `TV_PROGRAM` | Program TV | `channelName`, `date` |
+| `LOTTERY` | Wyniki loterii | `game` |
+| `EXCHANGE_RATE` | Kursy walut | `currency` |
+| `JOB_OFFERS` | Oferty pracy | `keywords`, `location` |
+| `NEWS` | Wiadomości | `country`, `limit` |
+| `MANUAL` | Strona ręczna | - |
+
+### Porady
+
+- **Numeracja:** Zawsze używaj numerów z odpowiedniego zakresu dla danej kategorii
+- **Testowanie:** Najpierw utwórz szablon, przetestuj go na stronie testowej, potem twórz docelowe strony
+- **Zarządzanie:** Nieaktywne strony i szablony są ukryte dla użytkowników, ale widoczne w panelu admina
+- **Edycja:** Zmiana `configJson` w szablonie automatycznie wpływa na wszystkie strony używające tego szablonu
 
 ---
 
-## 📡 API Endpoints
-
-### Backend (localhost:8080):
-
-**Publiczne:**
-- `GET /api/public/pages` - lista wszystkich stron
-- `GET /api/public/pages/{pageNumber}` - szczegóły strony z wygenerowaną treścią
-- `GET /api/public/categories` - lista kategorii
-
-**Admin (wymagany JWT):**
-- `POST /api/admin/auth/login` - logowanie (zwraca JWT token)
-- `POST /api/admin/auth/logout` - wylogowanie
-- `POST /api/admin/auth/refresh` - odświeżenie tokenu
-- `GET /api/admin/pages` - lista stron (zarządzanie)
-- `POST /api/admin/pages` - utworzenie nowej strony
-- `PUT /api/admin/pages/{id}` - edycja strony
-- `DELETE /api/admin/pages/{id}` - usunięcie strony
-- `GET /api/admin/templates` - lista szablonów integracji
-- `POST /api/admin/templates` - utworzenie szablonu
-- `GET /api/admin/schemas` - lista schematów konfiguracji
-- `GET /api/admin/schemas/{source}` - schemat dla konkretnego źródła
-- `GET /api/admin/stats/pages` - statystyki odwiedzin
-
-**Dokumentacja Swagger:** http://localhost:8080/swagger-ui/index.html
-
----
-
-## 🔧 Konfiguracja
-
-### Zmienne środowiskowe (`.env`):
-```env
-# Backend
-POSTGRES_USER=teletext_user
-POSTGRES_PASSWORD=teletext_pass
-POSTGRES_DB=teletext_db
-
-# JWT
-JWT_SECRET=twój_sekret_base64
-
-# Redis
-REDIS_PASSWORD=redis_pass
-```
-
-### Klucze API (`.env.webclient`):
-```env
-# API URLs
-WEBCLIENT_OPEN_METEO_API_BASE_URL=https://api.open-meteo.com/
-WEBCLIENT_NBP_API_BASE_URL=https://api.nbp.pl/
-WEBCLIENT_NEWS_DATA_API_BASE_URL=https://newsdata.io/
-WEBCLIENT_LOTTO_API_BASE_URL=https://developers.lotto.pl/
-WEBCLIENT_JOOBLE_API_BASE_URL=https://jooble.org/
-WEBCLIENT_HOROSCOPE_API_BASE_URL=https://www.moj-codzienny-horoskop.com/
-WEBCLIENT_HIGHLIGHTLY_API_BASE_URL=https://sports.highlightly.net/
-WEBCLIENT_TVP_API_BASE_URL=https://www.tvp.pl/
-
-# API Secrets
-WEBCLIENT_NEWS_DATA_SECRET=pub_xxxxx
-WEBCLIENT_LOTTO_SECRET=xxxxx
-WEBCLIENT_JOOBLE_SECRET=xxxxx
-WEBCLIENT_HIGHLIGHTLY_SECRET=xxxxx
-```
-
-## 👥 Autorzy
-
+## Autorzy
 - [Sebastian Górski](https://github.com/sgorski00/)
 - [Jakub Grzymisławski](https://github.com/jgrzymislawski/)
 - [Łukasz Szenkiel](https://github.com/lukaszsz1991/)
@@ -306,13 +330,4 @@ WEBCLIENT_HIGHLIGHTLY_SECRET=xxxxx
 
 ---
 
-## 📄 Licencja
-
-Projekt wykonywany w ramach kursu *Projektowanie i programowanie systemów internetowych II*  
-Collegium Witelona Uczelnia Państwowa w Legnicy
-
----
-
-## 📞 Kontakt
-
-Projekt GitHub: [teletext-dev](https://github.com/lukaszsz1991/teletext-dev)
+> Projekt wykonywany w ramach kursu *Projektowanie i programowanie systemów internetowych II
