@@ -5,6 +5,8 @@ import LotteryPage from '../pages/integrations/Lotterypage';
 import WeatherPage from '../pages/integrations/WeatherPage';
 import CurrencyPage from '../pages/integrations/CurrencyPage';
 import JobsPage from '../pages/integrations/JobsPage';
+import HoroscopePage from '../pages/integrations/HoroscopePage';
+import TVPage from '../pages/integrations/TVPage';
 
 export const TEMPLATE_COMPONENTS = {
     'sport-table': SportsPage,
@@ -14,8 +16,8 @@ export const TEMPLATE_COMPONENTS = {
     'weather': WeatherPage,
     'exchange-rate': CurrencyPage,
     'job-offers': JobsPage,
-    'horoscope': null,
-    'tv-program': null,
+    'horoscope': HoroscopePage,
+    'tv-program': TVPage,
     'manual': null,
 };
 

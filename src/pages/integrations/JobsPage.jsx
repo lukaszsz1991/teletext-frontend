@@ -27,9 +27,24 @@ function JobsPage() {
 
             const data = await response.json();
 
-            // Backend zwraca listę ofert w additionalData.jobs
-            const jobsList = data.content.additionalData.jobs || [];
-            setJobs(jobsList.slice(0, 10)); // Maksymalnie 10 ofert
+            const additionalData = data.content.additionalData || {};
+
+            if (additionalData.jobs && Array.isArray(additionalData.jobs)) {
+                setJobs(additionalData.jobs.slice(0, 10));
+            } else if (additionalData.title || additionalData.company) {
+                const singleJob = {
+                    title: data.content.title || additionalData.title || 'Brak tytułu',
+                    company: additionalData.company || '',
+                    location: additionalData.location || '',
+                    salary: additionalData.salary || '',
+                    snippet: data.content.description || '',
+                    updated: additionalData.updatedAt || null,
+                    link: additionalData.link || ''
+                };
+                setJobs([singleJob]);
+            } else {
+                setJobs([]);
+            }
 
             setLoading(false);
         } catch (error) {
