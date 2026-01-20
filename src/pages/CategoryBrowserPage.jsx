@@ -1,135 +1,293 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import apiClient from '../services/api';
+import Scanlines from '../components/layout/Scanlines';
+import Header from '../components/layout/Header';
+import Footer from '../components/layout/Footer';
+import '../styles/teletext.css';
+
+const API_BASE_URL = window.env?.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 const CategoryBrowserPage = () => {
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const [categories, setCategories] = useState([]);
+    const [allPages, setAllPages] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredPages, setFilteredPages] = useState({});
+    const [noResults, setNoResults] = useState(false);
 
     useEffect(() => {
-        fetchCategoriesWithPages();
+        const fetchData = async () => {
+            try {
+                const categoriesResponse = await fetch(`${API_BASE_URL}/public/categories`);
+                const categoriesData = await categoriesResponse.json();
+                setCategories(categoriesData);
+
+                const pagesData = {};
+                for (const category of categoriesData) {
+                    const pagesResponse = await fetch(
+                        `${API_BASE_URL}/public/pages?category=${category.originalName}`
+                    );
+                    const pages = await pagesResponse.json();
+                    pagesData[category.originalName] = pages;
+                }
+
+                setAllPages(pagesData);
+                setFilteredPages(pagesData);
+                setLoading(false);
+            } catch (error) {
+                console.error('Błąd podczas pobierania danych:', error);
+                setLoading(false);
+            }
+        };
+
+        fetchData();
     }, []);
 
-    const fetchCategoriesWithPages = async () => {
-        setLoading(true);
-        setError(null);
+    const normalizeText = (text) => {
+        return text
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    };
 
-        try {
-            // Pobierz kategorie
-            const categoriesResponse = await apiClient.get('/public/categories');
-            const fetchedCategories = categoriesResponse.data || [];
+    const highlightMatch = (text, query) => {
+        if (!query) return text;
 
-            console.log('📦 Kategorie:', fetchedCategories.length);
+        const normalizedText = normalizeText(text);
+        const normalizedQuery = normalizeText(query);
+        const index = normalizedText.indexOf(normalizedQuery);
 
-            // Dla każdej kategorii pobierz strony
-            const categoriesWithPages = await Promise.all(
-                fetchedCategories.map(async (category) => {
-                    const pagesResponse = await apiClient.get('/public/pages', {
-                        params: { category: category.originalName }
-                    });
+        if (index === -1) return text;
 
-                    const pages = pagesResponse.data || [];
-                    console.log(`📄 ${category.originalName}: ${pages.length} stron`);
+        const start = index;
+        const end = index + query.length;
 
-                    return { ...category, pages, hasPages: pages.length > 0 };
-                })
-            );
+        return (
+            <>
+                {text.substring(0, start)}
+                <span style={{ backgroundColor: '#ffaa00', color: '#000' }}>
+                    {text.substring(start, end)}
+                </span>
+                {text.substring(end)}
+            </>
+        );
+    };
 
-            // Filtruj kategorie ze stronami
-            const withContent = categoriesWithPages.filter(cat => cat.hasPages);
+    const handleSearch = () => {
+        if (!searchQuery.trim()) {
+            setFilteredPages(allPages);
+            setNoResults(false);
+            return;
+        }
 
-            console.log('✅ Wyświetlam kategorii:', withContent.length);
-            setCategories(withContent);
-        } catch (err) {
-            console.error('❌ Błąd:', err);
-            setError('Nie udało się pobrać danych.');
-        } finally {
-            setLoading(false);
+        const normalizedQuery = normalizeText(searchQuery);
+        const filtered = {};
+        let hasResults = false;
+
+        categories.forEach((category) => {
+            const categoryName = category.originalName;
+            const categoryDisplayName = normalizeText(category.category);
+            const pages = allPages[categoryName] || [];
+
+            const matchingPages = pages.filter((page) => {
+                const titleMatch = normalizeText(page.title || '').includes(normalizedQuery);
+                const categoryMatch = categoryDisplayName.includes(normalizedQuery);
+                return titleMatch || categoryMatch;
+            });
+
+            if (matchingPages.length > 0) {
+                filtered[categoryName] = matchingPages;
+                hasResults = true;
+            }
+        });
+
+        setFilteredPages(filtered);
+        setNoResults(!hasResults);
+    };
+
+    const handleClearSearch = () => {
+        setSearchQuery('');
+        setFilteredPages(allPages);
+        setNoResults(false);
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
         }
     };
 
-    if (loading) return <div className="teletext-page"><h1 className="page-title">Ładowanie...</h1></div>;
-    if (error) return <div className="teletext-page"><h1 className="page-title">{error}</h1></div>;
+    if (loading) {
+        return (
+            <>
+                <Scanlines />
+                <div className="container">
+                    <Header />
+                    <div className="info-section" style={{ textAlign: 'center' }}>
+                        <p>Ładowanie kategorii...</p>
+                    </div>
+                    <Footer />
+                </div>
+            </>
+        );
+    }
 
     return (
-        <div className="teletext-page">
-            <div className="page-header" style={{ textAlign: 'center', marginBottom: '40px' }}>
-                <h1 className="page-title" style={{ fontSize: '42px', marginBottom: '10px' }}>
-                    📺 TELEGAZETA
-                </h1>
-                <p style={{ fontSize: '14px', color: '#00aa00' }}>
-                    Przeglądanie stron telegazety według kategorii
-                </p>
-            </div>
+        <>
+            <Scanlines />
+            <div className="container">
+                <Header />
 
-            <div className="page-content">
-                {categories.map((category) => (
-                    <div key={category.originalName} style={{ marginBottom: '50px' }}>
-                        <div style={{ borderBottom: '2px solid #00ff00', marginBottom: '20px', paddingBottom: '10px' }}>
-                            <h2 style={{ fontSize: '24px', color: '#00ff00' }}>
-                                {category.category}
-                            </h2>
-                            <p style={{ fontSize: '13px', color: '#00aa00', marginTop: '5px' }}>
-                                {category.description} • {category.pages.length} stron
-                            </p>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-                            {category.pages.map((page) => (
-                                <div
-                                    key={page.id}
-                                    onClick={() => navigate(`/pages/${page.pageNumber}`)}
-                                    style={{
-                                        border: '2px solid #00aa00',
-                                        borderRadius: '8px',
-                                        padding: '20px',
-                                        backgroundColor: '#0a3d0a',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.3s ease'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.borderColor = '#00ff00';
-                                        e.currentTarget.style.transform = 'translateY(-5px)';
-                                        e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.3)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.borderColor = '#00aa00';
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                        e.currentTarget.style.boxShadow = 'none';
-                                    }}
-                                >
-                                    <h3 style={{ fontSize: '18px', color: '#00ff00', margin: '0 0 12px 0' }}>
-                                        {page.title}
-                                    </h3>
-
-                                    <div style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        paddingTop: '12px',
-                                        borderTop: '1px solid #003300'
-                                    }}>
-                                        <span style={{ fontSize: '12px', color: '#00aa00' }}>
-                                            {category.originalName}
-                                        </span>
-                                        <span style={{ fontSize: '16px', color: '#00ff00', fontWeight: 'bold' }}>
-                                            {page.pageNumber}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '30px',
+                    padding: '20px',
+                    border: '2px solid #00aa00',
+                    backgroundColor: '#0a0a0a'
+                }}>
+                    <h2 style={{ fontSize: '24px', color: '#00ff00', margin: 0 }}>
+                        Przeglądaj strony
+                    </h2>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            placeholder="Wyszukaj..."
+                            style={{
+                                padding: '10px 15px',
+                                fontSize: '14px',
+                                backgroundColor: '#0a0a0a',
+                                color: '#00ff00',
+                                border: '2px solid #00aa00',
+                                outline: 'none',
+                                fontFamily: 'monospace',
+                                minWidth: '250px'
+                            }}
+                        />
+                        <button
+                            className="btn"
+                            onClick={handleSearch}
+                            style={{ padding: '10px 20px' }}
+                        >
+                            🔍 SZUKAJ
+                        </button>
+                        {searchQuery && (
+                            <button
+                                className="btn"
+                                onClick={handleClearSearch}
+                                style={{ padding: '10px 20px', borderColor: '#ffaa00', color: '#ffaa00' }}
+                            >
+                                ✖ WYCZYŚĆ
+                            </button>
+                        )}
                     </div>
-                ))}
-            </div>
+                </div>
 
-            <div style={{ marginTop: '40px', padding: '20px', border: '1px solid #00aa00', backgroundColor: '#0a0a0a', textAlign: 'center' }}>
-                <p style={{ fontSize: '12px', color: '#00aa00' }}>
-                    📊 Łącznie stron: {categories.reduce((sum, cat) => sum + cat.pages.length, 0)} | 📁 Kategorii: {categories.length}
-                </p>
+                {noResults && (
+                    <div className="info-section" style={{
+                        textAlign: 'center',
+                        padding: '30px',
+                        border: '2px solid #ffaa00',
+                        backgroundColor: '#1a1a00',
+                        marginBottom: '30px'
+                    }}>
+                        <p style={{ fontSize: '18px', color: '#ffaa00', marginBottom: '15px' }}>
+                            🔍 Brak wyników dla: "{searchQuery}"
+                        </p>
+                        <button className="btn" onClick={handleClearSearch}>
+                            WYCZYŚĆ WYSZUKIWANIE
+                        </button>
+                    </div>
+                )}
+
+                {categories.map((category) => {
+                    const pages = filteredPages[category.originalName] || [];
+
+                    if (pages.length === 0) {
+                        return null;
+                    }
+
+                    return (
+                        <div key={category.originalName} style={{ marginBottom: '40px' }}>
+                            <div style={{
+                                padding: '15px 20px',
+                                backgroundColor: '#003300',
+                                border: '2px solid #00aa00',
+                                marginBottom: '15px'
+                            }}>
+                                <h3 style={{ fontSize: '20px', color: '#00ff00', margin: 0 }}>
+                                    {category.category}
+                                </h3>
+                                <p style={{ fontSize: '12px', color: '#00aa00', margin: '5px 0 0 0' }}>
+                                    {category.description} • {pages.length} {pages.length === 1 ? 'stron' : 'stron'}
+                                </p>
+                            </div>
+
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                                gap: '20px'
+                            }}>
+                                {pages.map((page) => (
+                                    <div
+                                        key={page.id}
+                                        onClick={() => navigate(`/pages/${page.pageNumber}`)}
+                                        style={{
+                                            padding: '20px',
+                                            border: '2px solid #00aa00',
+                                            backgroundColor: '#0a0a0a',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.backgroundColor = '#003300';
+                                            e.currentTarget.style.borderColor = '#00ff00';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.backgroundColor = '#0a0a0a';
+                                            e.currentTarget.style.borderColor = '#00aa00';
+                                        }}
+                                    >
+                                        <h4 style={{ fontSize: '18px', color: '#00ff00', marginBottom: '10px' }}>
+                                            {highlightMatch(page.title, searchQuery)}
+                                        </h4>
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center'
+                                        }}>
+                                            <span style={{ fontSize: '12px', color: '#00aa00' }}>
+                                                {category.originalName}
+                                            </span>
+                                            <span style={{
+                                                fontSize: '20px',
+                                                fontWeight: 'bold',
+                                                color: '#00ff00'
+                                            }}>
+                                                {page.pageNumber}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })}
+
+                <div className="button-group" style={{ marginTop: '40px' }}>
+                    <button className="btn" onClick={() => navigate('/')}>
+                        ← Powrót do strony głównej
+                    </button>
+                </div>
+
+                <Footer />
             </div>
-        </div>
+        </>
     );
 };
 

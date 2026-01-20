@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Scanlines from '../../components/layout/Scanlines';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import '../../styles/teletext.css';
 
-const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = window.env?.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 function SportsPage() {
     const navigate = useNavigate();
+    const { pageNumber } = useParams();
     const [sportsData, setSportsData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -18,7 +19,7 @@ function SportsPage() {
         setError(null);
 
         try {
-            const response = await fetch(`${API_BASE_URL}/public/pages/201`);
+            const response = await fetch(`${API_BASE_URL}/public/pages/${pageNumber}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -30,7 +31,7 @@ function SportsPage() {
                 pageNumber: data.pageNumber,
                 title: data.content.title,
                 description: data.content.description,
-                standings: data.content.additionalData.standings,
+                standings: data.content.additionalData.Standings || data.content.additionalData.standings,
                 source: data.content.source,
                 updatedAt: data.content.updatedAt
             });
@@ -45,15 +46,12 @@ function SportsPage() {
 
     useEffect(() => {
         fetchSportsData();
-        // Odświeżaj co 5 minut
-        const interval = setInterval(fetchSportsData, 5 * 60 * 1000);
-        return () => clearInterval(interval);
-    }, []);
+    }, [pageNumber]);
 
     const getTeamClass = (position) => {
-        if (position <= 2) return 'champions-league';        // 1-2: Liga Mistrzów
-        if (position >= 3 && position <= 4) return 'europa-league';  // 3-4: Liga Konferencji
-        if (position >= 16) return 'relegation';             // 16-18: Spadek
+        if (position <= 2) return 'champions-league';
+        if (position >= 3 && position <= 4) return 'europa-league';
+        if (position >= 16) return 'relegation';
         return '';
     };
 
@@ -112,7 +110,7 @@ function SportsPage() {
 ╚═══════════════════════════════════╝`}
                 </div>
 
-                {sportsData && (
+                {sportsData && sportsData.standings && (
                     <div className="info-section">
                         <div className="sports-info">
                             <p>{sportsData.description}</p>
@@ -180,9 +178,6 @@ function SportsPage() {
                     </button>
                     <button className="btn" onClick={fetchSportsData}>
                         🔄 Odśwież tabelę
-                    </button>
-                    <button className="btn" onClick={() => navigate('/pages/202')}>
-                        📅 Mecze ligowe
                     </button>
                 </div>
 
