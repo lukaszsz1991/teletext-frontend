@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = window.env?.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
@@ -10,7 +10,7 @@ const apiClient = axios.create({
     timeout: 10000,
 });
 
-// Interceptor dodający token JWT do każdego requestu
+// Dodaje token do każdego requestu
 apiClient.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('jwt_token');
@@ -24,7 +24,7 @@ apiClient.interceptors.request.use(
     }
 );
 
-// Interceptor obsługujący wygaśnięcie tokena
+// Obsługa wygaśnięcia tokena
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
@@ -32,7 +32,6 @@ apiClient.interceptors.response.use(
             localStorage.removeItem('jwt_token');
             localStorage.removeItem('user_email');
 
-            // Tylko przekieruj jeśli jesteśmy w obszarze admina
             if (window.location.pathname.startsWith('/admin') && window.location.pathname !== '/admin/login') {
                 window.location.href = '/admin/login';
             }

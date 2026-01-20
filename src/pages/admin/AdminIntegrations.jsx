@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
+import { getTemplates, deleteTemplate } from '../../services/templateService';
+import { getPages } from '../../services/pageService';
+import { hasTemplateCreatedPage, getPageNumberByTemplateId } from '../../utils/pageUtils';
 import '../../styles/teletext.css';
-const API_BASE_URL = window.env?.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function AdminIntegrations() {
     const navigate = useNavigate();
     const [templates, setTemplates] = useState([]);
+    const [pages, setPages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
     const integrationInfo = {
         'EXCHANGE_RATE': { icon: '💱', name: 'Kursy Walut', color: '#ffaa00' },
         'WEATHER': { icon: '🌤️', name: 'Pogoda', color: '#00aaff' },
@@ -21,30 +26,23 @@ function AdminIntegrations() {
     };
 
     useEffect(() => {
-        fetchTemplates();
+        fetchData();
     }, []);
 
-    const fetchTemplates = async () => {
+    const fetchData = async () => {
         setLoading(true);
         setError(null);
 
         try {
-            const token = localStorage.getItem('jwt_token');
-            const response = await fetch(`${API_BASE_URL}/admin/templates`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            const [templatesData, pagesData] = await Promise.all([
+                getTemplates(),
+                getPages()
+            ]);
 
-            if (!response.ok) {
-                throw new Error('Nie udało się pobrać listy integracji');
-            }
-
-            const data = await response.json();
-            setTemplates(data);
+            setTemplates(templatesData);
+            setPages(pagesData);
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Nie udało się pobrać danych');
         } finally {
             setLoading(false);
         }
@@ -54,22 +52,21 @@ function AdminIntegrations() {
         if (!window.confirm('Czy na pewno chcesz usunąć ten template?')) return;
 
         try {
-            const token = localStorage.getItem('jwt_token');
-            const response = await fetch(`${API_BASE_URL}/admin/templates/${templateId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                alert('Template został usunięty');
-                fetchTemplates();
-            } else {
-                alert('Błąd podczas usuwania template');
-            }
+            await deleteTemplate(templateId);
+            alert('Template został usunięty');
+            fetchData();
         } catch (err) {
-            alert('Błąd: ' + err.message);
+            alert('Błąd podczas usuwania template: ' + err.message);
+        }
+    };
+
+    const handleAddPageClick = (templateId) => {
+        // Sprawdź czy template ma już stronę
+        if (hasTemplateCreatedPage(pages, templateId)) {
+            const pageNumber = getPageNumberByTemplateId(pages, templateId);
+            alert(`Strona już istnieje (numer ${pageNumber})`);
+        } else {
+            navigate(`/admin/pages/new-from-template?templateId=${templateId}`);
         }
     };
 
@@ -100,6 +97,7 @@ function AdminIntegrations() {
             </AdminLayout>
         );
     }
+
     if (error) {
         return (
             <AdminLayout>
@@ -110,7 +108,7 @@ function AdminIntegrations() {
                 <div className="info-section" style={{ textAlign: 'center', borderColor: '#ff0000', color: '#ff0000' }}>
                     <h3>Błąd</h3>
                     <p>{error}</p>
-                    <button className="btn" onClick={fetchTemplates} style={{ marginTop: '20px' }}>
+                    <button className="btn" onClick={fetchData} style={{ marginTop: '20px' }}>
                         Spróbuj ponownie
                     </button>
                 </div>
@@ -129,7 +127,7 @@ function AdminIntegrations() {
                 <button className="btn" onClick={() => navigate('/admin/templates/new')}>
                     ➕ Dodaj nową integrację
                 </button>
-                <button className="btn" onClick={fetchTemplates}>
+                <button className="btn" onClick={fetchData}>
                     🔄 Odśwież listę
                 </button>
             </div>
@@ -173,8 +171,8 @@ function AdminIntegrations() {
                                         <div className="template-actions">
                                             <button
                                                 className="btn btn-small btn-add"
-                                                onClick={() => navigate('/admin/templates/new')}
-                                                title="Dodaj nową integrację"
+                                                onClick={() => handleAddPageClick(template.id)}
+                                                title="Utwórz stronę z tego szablonu"
                                                 style={{
                                                     backgroundColor: '#003300',
                                                     borderColor: '#00ff00',
@@ -229,4 +227,5 @@ function AdminIntegrations() {
         </AdminLayout>
     );
 }
+
 export default AdminIntegrations;

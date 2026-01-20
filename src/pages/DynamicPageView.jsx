@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getIntegration } from '../config/integrations-config';
 import ManualPageWrapper from './ManualPageWrapper';
+import TemplatePageWrapper from './TemplatePageWrapper';
 
-const API_BASE_URL = window._env_.REACT_APP_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = window.env?.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 const DynamicPageView = () => {
     const { pageNumber } = useParams();
@@ -19,9 +20,12 @@ const DynamicPageView = () => {
                     const data = await response.json();
                     console.log('📦 Typ strony:', data.type);
                     setPageType(data.type);
+                } else {
+                    setPageType('NOT_FOUND');
                 }
             } catch (err) {
                 console.error('Błąd sprawdzania typu:', err);
+                setPageType('ERROR');
             } finally {
                 setLoading(false);
             }
@@ -30,19 +34,21 @@ const DynamicPageView = () => {
         checkPageType();
     }, [pageNumber]);
 
-    // Jeśli loading - pokaż placeholder
     if (loading) {
         return <div>Ładowanie...</div>;
     }
 
-    // Jeśli typ MANUAL - użyj ManualPageWrapper
     if (pageType === 'MANUAL') {
         console.log('✅ Renderuję ManualPageWrapper');
         return <ManualPageWrapper />;
     }
 
-    // W przeciwnym razie - użyj starego systemu z integrations-config
-    console.log('✅ Renderuję przez integrations-config');
+    if (pageType === 'TEMPLATE') {
+        console.log('✅ Renderuję TemplatePageWrapper');
+        return <TemplatePageWrapper />;
+    }
+
+    console.log('✅ Szukam w integrations-config');
     const integration = getIntegration(pageNumber);
 
     if (!integration) {
@@ -61,14 +67,14 @@ const DynamicPageView = () => {
                         backgroundColor: '#1a0000'
                     }}>
                         <p style={{ fontSize: '16px', color: '#ff6b6b', marginBottom: '20px' }}>
-                            Nie znaleziono integracji o numerze {pageNumber}
+                            Nie znaleziono strony o numerze {pageNumber}
                         </p>
                         <button
                             className="btn"
                             onClick={() => navigate('/pages')}
                             style={{ marginTop: '20px' }}
                         >
-                            ← Powrót do listy integracji
+                            ← Powrót do listy
                         </button>
                     </div>
                 </div>

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/layout/AdminLayout';
+import { createTemplate } from '../../services/templateService';
+import { getSchemaBySource } from '../../services/schemaService';
 import '../../styles/teletext.css';
-
-const API_BASE_URL = window.env?.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 function TemplateAddPage() {
     const navigate = useNavigate();
@@ -30,33 +30,19 @@ function TemplateAddPage() {
             return;
         }
 
+        // Pobierz schemat z backendu
         setLoadingSchema(true);
         try {
-            const token = localStorage.getItem('jwt_token');
-            const response = await fetch(`${API_BASE_URL}/admin/schemas/${newSource}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Nie udało się pobrać schematu');
-            }
-
-            const schemaData = await response.json();
+            const schemaData = await getSchemaBySource(newSource);
             setSchema(schemaData);
 
+            // Zbuduj przykładowy JSON na podstawie schematu
             const exampleConfig = {};
 
+            // Dodaj wymagane pola
             if (schemaData.required && schemaData.required.length > 0) {
                 schemaData.required.forEach(field => {
                     exampleConfig[field] = "";
-                });
-            }
-
-            if (schemaData.optional && schemaData.optional.length > 0) {
-                schemaData.optional.forEach(field => {
                 });
             }
 
@@ -75,6 +61,7 @@ function TemplateAddPage() {
         setError(null);
 
         try {
+            // Walidacja JSON
             let configJson;
             try {
                 configJson = JSON.parse(configJsonText);
@@ -82,6 +69,7 @@ function TemplateAddPage() {
                 throw new Error('Pole Konfiguracja musi być poprawnym formatem JSON!');
             }
 
+            // Walidacja wymaganych pól
             if (schema && schema.required) {
                 for (const field of schema.required) {
                     if (!configJson[field] || (typeof configJson[field] === 'string' && configJson[field].trim() === '')) {
@@ -90,32 +78,17 @@ function TemplateAddPage() {
                 }
             }
 
-            const token = localStorage.getItem('jwt_token');
-            const payload = {
+            await createTemplate({
                 name: template.name,
                 source: template.source,
                 category: template.category,
                 configJson: configJson
-            };
-
-            const response = await fetch(`${API_BASE_URL}/admin/templates`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
             });
-
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.detail || errData.message || 'Błąd zapisu szablonu');
-            }
 
             alert('✅ Integracja dodana pomyślnie!');
             navigate('/admin/integrations');
         } catch (err) {
-            setError(err.message);
+            setError(err.response?.data?.detail || err.message);
         } finally {
             setSaving(false);
         }

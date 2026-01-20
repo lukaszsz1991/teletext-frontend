@@ -12,6 +12,7 @@ import TemplateAddPage from "./pages/admin/TemplateAddPage.jsx";
 import CategoryBrowserPage from './pages/CategoryBrowserPage';
 import DynamicPageView from './pages/DynamicPageView';
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import AdminPageFromTemplate from './pages/admin/AdminPageFromTemplate';
 
 function App() {
     return (
@@ -25,6 +26,8 @@ function App() {
                 <Route path="/admin/login" element={<AdminLogin />} />
 
                 <Route path="/admin/templates/new" element={<TemplateAddPage />} />
+
+                <Route path="/admin/pages/new-from-template" element={<AdminPageFromTemplate />} />
 
                 <Route
                     path="/admin/dashboard"
