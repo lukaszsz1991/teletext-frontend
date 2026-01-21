@@ -5,7 +5,8 @@ import { getTemplates, getTemplateById } from '../../services/templateService';
 import { getPages, createPageFromTemplate } from '../../services/pageService';
 import {
     getOccupiedPageNumbers,
-    getFirstFreePageNumber,
+    getFirstFreePageNumberForCategory,
+    getCategoryRange,
     isValidPageNumber,
     isPageNumberOccupied
 } from '../../utils/pageUtils';
@@ -71,12 +72,22 @@ function AdminPageFromTemplate() {
     };
 
     const handleUseFirstFree = () => {
-        const firstFree = getFirstFreePageNumber(pages);
+        if (!selectedTemplate) {
+            setError('Najpierw wybierz szablon');
+            return;
+        }
+
+        const firstFree = getFirstFreePageNumberForCategory(pages, selectedTemplate.category);
+
         if (firstFree) {
             setPageNumber(firstFree.toString());
             setError(null);
+
+            const range = getCategoryRange(selectedTemplate.category);
+            console.log(`Podpowiadam pierwszy wolny numer dla kategorii ${selectedTemplate.category}: ${firstFree} (zakres: ${range.start}-${range.end})`);
         } else {
-            setError('Brak wolnych numerów stron w zakresie 101-999');
+            const range = getCategoryRange(selectedTemplate.category);
+            setError(`Brak wolnych numerów stron w zakresie ${range.start}-${range.end} dla kategorii ${selectedTemplate.category}`);
         }
     };
 
@@ -86,7 +97,6 @@ function AdminPageFromTemplate() {
         setError(null);
 
         try {
-            // Walidacja
             if (!selectedTemplate) {
                 throw new Error('Wybierz szablon');
             }
@@ -99,7 +109,6 @@ function AdminPageFromTemplate() {
                 throw new Error(`Numer strony ${pageNumber} jest już zajęty`);
             }
 
-            // Utworzenie strony
             await createPageFromTemplate({
                 pageNumber: parseInt(pageNumber),
                 category: selectedTemplate.category,
@@ -115,7 +124,6 @@ function AdminPageFromTemplate() {
         }
     };
 
-    // Grupowanie szablonów po category
     const groupedTemplates = templates.reduce((acc, template) => {
         const category = template.category;
         if (!acc[category]) {
@@ -239,6 +247,12 @@ function AdminPageFromTemplate() {
                                     </button>
                                 </div>
                                 <p style={{ fontSize: '11px', color: '#aa0', marginTop: '8px' }}>
+                                    {selectedTemplate && (
+                                        <>
+                                            Zakres dla kategorii {selectedTemplate.category}: {getCategoryRange(selectedTemplate.category).start}-{getCategoryRange(selectedTemplate.category).end}
+                                            <br />
+                                        </>
+                                    )}
                                     Zajęte numery: {occupiedNumbers.length > 0 ? occupiedNumbers.sort((a, b) => a - b).join(', ') : 'Brak'}
                                 </p>
                             </div>

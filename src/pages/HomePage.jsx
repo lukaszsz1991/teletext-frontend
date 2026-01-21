@@ -53,7 +53,8 @@ function HomePage() {
             <div className="info-section">
                 <h3>🔧 Technologia:</h3>
                 <ul className="feature-list">
-                    <li>Frontend: React</li>
+                    <li>
+                        : React</li>
                     <li>Komunikacja: REST API</li>
                     <li>Dokumentacja: OpenAPI</li>
                     <li>Design: Telegazeta (retro aesthetic)</li>
