@@ -4,7 +4,7 @@ import { getIntegration } from '../config/integrations-config';
 import ManualPageWrapper from './ManualPageWrapper';
 import TemplatePageWrapper from './TemplatePageWrapper';
 
-const API_BASE_URL = window.env?.REACT_APP_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = window._env_?.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 const DynamicPageView = () => {
     const { pageNumber } = useParams();

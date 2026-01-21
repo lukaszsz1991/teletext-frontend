@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getComponentForSource } from '../config/template-components-mapping';
 
-const API_BASE_URL = window.env?.REACT_APP_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = window._env_?.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 function TemplatePageWrapper() {
     const { pageNumber } = useParams();
