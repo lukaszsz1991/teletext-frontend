@@ -1,3 +1,3 @@
-window._env_ = {
+window.env = {
     REACT_APP_API_URL: "${REACT_APP_API_URL}"
 };
